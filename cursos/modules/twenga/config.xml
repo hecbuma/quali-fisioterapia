@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+	<name>twenga</name>
+	<displayName>Twenga API</displayName>
+	<version>1.3</version>
+	<description>Export your products to Twenga.com and use the Twenga tracker for customers\' order.</description>
+	<author></author>
+	<tab>smart_shopping</tab>
+	<is_configurable>1</is_configurable>
+	<need_instance>1</need_instance>
+	<limited_countries></limited_countries>
+</module>
