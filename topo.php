@@ -14,7 +14,7 @@
         <script src="javascripts/cufon-yui.js" type="text/javascript"></script>
 	<script src="javascripts/Futura_Hv_BT_400.font.js" type="text/javascript"></script>
 	<script type="text/javascript">
-	    Cufon.replace('h1');
+	    Cufon.replace('h1,h2');
 	</script>
 
     </head>

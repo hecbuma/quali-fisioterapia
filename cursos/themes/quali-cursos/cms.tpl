@@ -1,28 +1,13 @@
-{*
-* 2007-2011 PrestaShop 
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author PrestaShop SA <contact@prestashop.com>
-*  @copyright  2007-2011 PrestaShop SA
-*  @version  Release: $Revision: 1.4 $
-*  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*}
+  <h1>Cursos</h1>
+
+                <ul id="menu-lateral">
+                    <li><a href="/cursos/content/category/2-agenda">Agenda</a></li>
+                    <li><a href="/cursos/content/18-ministrantes">Ministrantes</a></li>
+                    <li><a href="/cursos/content/19-vatagens">Vantagens</a></li>
+                    <li><a href="/cursos/2-inscreva-se">Inscreva-se</a></li>
+                    <li><a href="javascript:history.go(-1)">Voltar</a></li>
+                </ul>
+                
 {if $cms->id != $cgv_id}
 	{include file="$tpl_dir./breadcrumb.tpl"}
 {/if}
@@ -40,10 +25,29 @@
 			</p>
 		</div>
 	{/if}
-	<div class="rte{if $content_only} content_only{/if}">
+	<!--<div class="rte{if $content_only} content_only{/if}">
 		{$cms->content}
-	</div>
+	</div>-->
+        
+                <div id="detalhes-cursos">
+                    <h2>{$cms->meta_title|escape:'htmlall':'UTF-8'}</h2>
+                    {$cms->content}
+                </div>
+
 {elseif isset($category)}
+
+        <div id="lista-cursos">
+            <h2>TODOS OS CURSOS</h2>
+                	<ul>
+				{foreach from=$cms_pages item=cmspages}
+					<li>
+					• <a href="{$link->getCMSLink($cmspages.id_cms, $cmspages.link_rewrite)|escape:'htmlall':'UTF-8'}">{$cmspages.meta_title|escape:'htmlall':'UTF-8'}</a>
+					</li>
+				{/foreach}
+			</ul>
+
+                </div>
+<!--
 	<div>
 		<h1>{$category->name|escape:'htmlall':'UTF-8'}</h1>
 		{if isset($sub_category) & !empty($sub_category)}	
@@ -66,8 +70,13 @@
 				{/foreach}
 			</ul>
 		{/if}
-	</div>
+	</div>-->
 {else}
 	{l s='This page does not exist.'}
 {/if}
-<br />
+
+
+            <div style="clear:both;"></div>
+            <div id="cursos-aviso" class="font-azul">
+               <b>Todos os nossos cursos encontram-se de acordo com a Legislação do COFFITO e do CNE.</b> 
+            </div>

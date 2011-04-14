@@ -6,12 +6,22 @@ body {
     text-align: left;
 }
 
+body#product, body#category {
+    
+    background:url('../images/fundo-laranja.jpg') repeat center center fixed;
+
+
+}
 #site {
     width:954px;
     height:582px;
     background:url('../images/fundo-laranja.jpg') no-repeat center center;
     margin:30px auto;
     border:solid 2px #ffffff;
+}
+
+body#product #site, body#category #site {
+    background:url('../images/canto-inscreva-se.png') #EBEBEC no-repeat top left;
 }
 
 #site #topo {
@@ -37,12 +47,15 @@ body {
     padding:20px;
     font-size:13px;
     font-weight:bold;
-
 }
 
 #site #meio {
     height:375px;
+}
 
+#site #meio p {
+    line-height:115%;
+    margin-bottom:5px;
 }
 
 #site #meio h1 {
@@ -61,6 +74,10 @@ body {
     width:830px;
 }
 
+#site #meio #menu-lateral {
+    width:150px;
+    float:left;
+}
 
 #site #meio #menu-lateral li {
     width:150px;
@@ -77,6 +94,8 @@ body {
     padding:8px;
     padding-left:15px;
     font-size:14px;
+    text-transform:uppercase;
+    font-weight:bold;
 }
 
 #site #meio #icones-destaque li {
@@ -111,6 +130,64 @@ body {
     background:url('../images/cursos-ico-inscreva-se.png') no-repeat center center;  
 }
 
+#site #meio #detalhes-cursos {
+    width:395px;
+    height:295px;
+    overflow-y:scroll;
+    float:right;
+    margin-right:15px;
+    margin-top:-50px;
+    color:#ffffff;
+}
+
+#site #meio #detalhes-cursos h2 {
+    text-transform:uppercase;
+    font-size:22px;
+    color:#1D2E63;
+    margin-bottom:15px;
+}
+
+#site #meio #lista-cursos {
+    width:450px;
+    height:295px;
+    overflow-y:scroll;
+    float:right;
+    margin-right:15px;
+    margin-top:-50px;
+    color:#1D2E63;
+}
+
+#site #meio #lista-cursos h2 {
+    text-transform:uppercase;
+    font-size:18px;
+    color:#ffffff;
+    margin-bottom:15px;
+}
+
+#site #meio #lista-cursos li {
+    margin:5px;
+}
+
+#site #meio #detalhes-cursos h3 {
+    color:#1D2E63;
+    margin-bottom:15px;
+    font-size:13px;
+}
+
+body#product #site #meio #lista-cursos, body#category #site #meio #lista-cursos {
+    margin:0;
+}
+
+body#product #site #meio #lista-cursos h2, body#category #site #meio #lista-cursos h2 {
+    color:#E77817;    
+}
+
+#site #meio #cursos-aviso {
+    width:320px;
+    float:left;
+    font-size:13px;
+    margin-left:20px;
+}
 
 #site #rodape {
     height:67px;
