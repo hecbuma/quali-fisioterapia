@@ -18,7 +18,7 @@
 	</script>
 
     </head>
-    <body>
+    <body <?php if ( strstr($_SERVER['SCRIPT_NAME'], "cursos-inscreva-se.php")) { echo "id='category'"; } ?> >
 
         <div id="site">
 

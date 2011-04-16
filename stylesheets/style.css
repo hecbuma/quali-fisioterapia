@@ -6,12 +6,14 @@ body {
     text-align: left;
 }
 
-body#product, body#category {
-    
-    background:url('../images/fundo-laranja.jpg') repeat center center fixed;
-
-
+a:hover{
+    text-decoration:underline;
 }
+
+body#category {
+    background:url('../images/fundo-laranja.jpg') repeat center center fixed;
+}
+
 #site {
     width:954px;
     height:582px;
@@ -20,7 +22,7 @@ body#product, body#category {
     border:solid 2px #ffffff;
 }
 
-body#product #site, body#category #site {
+body#category #site {
     background:url('../images/canto-inscreva-se.png') #EBEBEC no-repeat top left;
 }
 
@@ -147,6 +149,17 @@ body#product #site, body#category #site {
     margin-bottom:15px;
 }
 
+#site #meio #detalhes-cursos h3 {
+    color:#1D2E63;
+    margin-bottom:15px;
+    font-size:13px;
+}
+
+#site #meio #detalhes-cursos #ver-turmas {
+    font-weight:bold;
+    color:#1D2E63;
+}
+
 #site #meio #lista-cursos {
     width:450px;
     height:295px;
@@ -168,18 +181,87 @@ body#product #site, body#category #site {
     margin:5px;
 }
 
-#site #meio #detalhes-cursos h3 {
-    color:#1D2E63;
-    margin-bottom:15px;
-    font-size:13px;
-}
-
-body#product #site #meio #lista-cursos, body#category #site #meio #lista-cursos {
+body#category #site #meio #lista-cursos {
     margin:0;
 }
 
-body#product #site #meio #lista-cursos h2, body#category #site #meio #lista-cursos h2 {
+body#category #site #meio #lista-cursos h2 {
     color:#E77817;    
+}
+
+body#category #site #meio #pagina-turmas {
+    width:670px;
+    float:right;
+    color:#1D2E63;
+    margin-top:45px;
+    font-weight:bold;
+}
+
+body#category #site #meio #pagina-turmas h2 {
+    text-transform:uppercase;
+    font-size:18px;
+    color:#E77817;
+    margin-bottom:10px;
+}
+
+body#category #site #meio #pagina-turmas h3 {
+    margin-bottom:15px;
+    font-size:14px;
+}
+
+body#category #site #meio #pagina-turmas h4 {
+    text-transform:uppercase;
+    font-size:13px;
+    margin-bottom:7px;
+}
+
+body#category #site #meio #pagina-turmas #lista-turmas {
+    width:400px;
+    height:250px;
+    overflow-y:scroll;
+    float:left;
+}
+
+body#category #site #meio #pagina-turmas #lista-turmas li {
+    margin-bottom:14px;    
+}
+
+body#category #site #meio #pagina-turmas #lista-turmas li span {
+    padding:3px;
+}
+
+body#category #site #meio #pagina-turmas #lista-turmas li .turma {
+    text-transform:uppercase;
+    background-color:#1D2E63;
+    color:#ffffff;
+    margin-right:5px;
+}
+
+body#category #site #meio #pagina-turmas #pagamento {
+    width:250px;
+    float:right;
+}
+
+body#category #site #meio #pagina-turmas #pagamento h4 {
+    font-size:12px;
+
+}
+
+body#category #site #meio #pagina-turmas #pagamento li {
+    font-size:15px;
+    color:#E77817;
+    margin-bottom:2px;
+}
+
+body#category #site #meio #pagina-turmas #pagamento li span {
+    background-color:#1D2E63;
+    color:#ffffff;
+    margin-right:5px;
+    display:inline-block;
+    width:120px;
+    padding:5px;
+    text-align:right;
+    font-size:12px;
 }
 
 #site #meio #cursos-aviso {

@@ -1,17 +1,34 @@
 
 {if isset($products)}
 
-        <div id="lista-cursos">
-            <h2>INSCREVA-SE</h2>
-                	<ul>
-				{foreach from=$products item=product name=products}
-					<li>
-					• <a href="{$product.link|escape:'htmlall':'UTF-8'}">{$product.name|escape:'htmlall':'UTF-8'}</a>
-					</li>
-				{/foreach}
-			</ul>
+    <div id="pagina-turmas">
+        <h2>{$category->name|escape:'htmlall':'UTF-8'}</h2>
+        <h3>{$category->description}</h3>
+        <ul id="lista-turmas">
+	{foreach from=$products item=product name=products}
+		<li>
+	
+                  {if $product.features}
+		    <h4>{$product.features.0.value}</h4>
+                    <span class="turma">Turma: {$product.features.1.value}</span><span>{$product.features.2.value}</span>
+		{/if}	
 
-                </div>
+		</li>
+	{/foreach}
+	</ul>
+
+        <div id="pagamento">
+            <h4>Valor e Condição de Pagamento</h4>
+            <ul>
+                <li><span>À Vista</span> {convertPrice price=$products.0.price}</li>
+                <li><span>Parcelado em 3x de</span> {convertPrice price=$products.0.price/3}</li>
+                <li><span>Parcelado em 6x de</span> {convertPrice price=$products.0.price/6}</li>
+                <li><span>Parcelado em 10x de</span> {convertPrice price=$products.0.price/10}</li>
+            <ul>
+        </div>
+
+    </div>
+
 <!--
 	<!-- Products list -->
 	<ul id="product_list" class="clear">

@@ -40,7 +40,12 @@
         <script src="{$base_dir_ssl}themes/quali-cursos/javascripts/cufon-yui.js" type="text/javascript"></script>
 	<script src="{$base_dir_ssl}themes/quali-cursos/javascripts/Futura_Hv_BT_400.font.js" type="text/javascript"></script>
 	<script type="text/javascript">
-	    Cufon.replace('h1,h2');
+	    Cufon.replace('h1,h2,h3,h4');
+            $(document).ready(function() {
+                $('.inscreva-se-click').click(function () {
+                    window.location = $('#ver-turmas').attr('href');
+                });
+            });
 	</script>
 
 	</head>

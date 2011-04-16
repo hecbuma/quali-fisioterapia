@@ -10,4 +10,29 @@
                     <li><a href="voltar">Voltar</a></li>
                 </ul>
 
+
+        <div id="lista-cursos">
+            <h2>TODOS OS CURSOS</h2>
+                	<ul>
+					<li>
+					• <a href="">NOME CURSO AQUI</a>
+					</li>
+					<li>
+					• <a href="">NOME CURSO AQUI</a>
+					</li>
+					<li>
+					• <a href="">NOME CURSO AQUI</a>
+					</li>
+					<li>
+					• <a href="">NOME CURSO AQUI</a>
+					</li>
+					<li>
+					• <a href="">NOME CURSO AQUI</a>
+					</li>
+					<li>
+					• <a href="">NOME CURSO AQUI</a>
+					</li>
+			</ul>
+
+                </div>
 <?php include 'rodape.php'; ?>

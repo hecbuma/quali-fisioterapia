@@ -4,7 +4,7 @@
                     <li><a href="/cursos/content/category/2-agenda">Agenda</a></li>
                     <li><a href="/cursos/content/18-ministrantes">Ministrantes</a></li>
                     <li><a href="/cursos/content/19-vatagens">Vantagens</a></li>
-                    <li><a href="/cursos/2-inscreva-se">Inscreva-se</a></li>
+                    <li><a href="/cursos/1-inscreva-se">Inscreva-se</a></li>
                     <li><a href="javascript:history.go(-1)">Voltar</a></li>
                 </ul>
                 
