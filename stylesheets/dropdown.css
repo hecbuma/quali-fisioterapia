@@ -1,0 +1,68 @@
+
+/* dropdown.css - horizontal pure CSS dropdown menu class
+ *
+ * Version: 0.3
+ * Type: strict
+ * Requires: reset.css
+ * Stack levels: 596-599
+ *
+ * (cc) 2006-2008 Tom Lwis (www.lwis.net). Some Rights Reserved.
+ * This style sheet is licensed under a Creative Commons License
+ * http://www.creativecommons.org/licenses/by-nc-sa/3.0/
+ */
+
+ul.dropdown {
+ position: relative;
+ z-index: 596;
+}
+
+ul.dropdown ul {
+ display: none;
+ position: absolute;
+ top: 100%;
+ left: 0;
+ z-index: 597;
+ width: 400px;
+ padding: 10px 0 10px 10px;
+ font-size:.8em;
+-webkit-border-bottom-left-radius: 10px;
+-moz-border-radius-bottomleft: 12px;
+border-bottom-left-radius: 12px;
+}
+ul.dropdown ul.rigth1 {
+ left:-300px;;
+}
+ul.dropdown ul.rigth2 {
+ left:-305px;;
+}
+ul.dropdown ul.rigth3 {
+ left:-260px;;
+}
+
+ul.dropdown ul  li{
+  padding:3px;
+}
+ul.dropdown ul  li:hover {
+  background:none;
+}
+ul.dropdown ul ul {
+ top: 2px;
+ left: 100%;
+}
+
+ul.dropdown li {
+ position: relative;
+ z-index: 598;
+}
+
+ul.dropdown li:hover {
+ z-index: 599;
+}
+
+ul.dropdown > li {
+ float: left;
+}
+
+ul.dropdown li:hover > ul {
+ display: block;
+}

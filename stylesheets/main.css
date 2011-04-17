@@ -1,0 +1,225 @@
+body {
+  background-color: #e78f14 ;
+  font-family: 'Arimo', arial, serif;
+  color:white;
+}
+header {
+margin-bottom:50px;
+
+}
+
+header h1 {
+    margin: 44px 0 0 78px;
+	background-image: url(../images/logo-marca-dagua-fundo-laranja.png);
+	width: 195px;
+	height: 79px;
+	text-indent: -9999px;
+}
+header section#logo {
+	
+}
+
+header nav {
+    font-family: 'Arimo', arial, serif;
+    height: 53px;
+	background: #142671;
+	-webkit-border-bottom-left-radius: 127px;
+	-moz-border-radius-bottomleft: 127px;
+	border-bottom-left-radius: 127px;
+	
+	background-image: -webkit-gradient(
+		linear,
+		left top,
+		right top,
+		color-stop(0, #152672),
+		color-stop(0.51, #2F3EAD),
+		color-stop(0.95, #152672)
+	);
+	background-image: -moz-linear-gradient(
+		left center,
+		#152672 0%,
+		#2F3EAD 51%,
+		#152672 95%
+	);
+	text-align: center;
+	color: white;
+    position: relative !important;
+	behavior: url(PIE.htc);
+}
+header nav h2 {
+	text-transform: uppercase;
+	font-weight: bold;
+	padding-top: 3px;
+	font-style: italic;
+}
+header nav ul {
+  
+}
+header nav  ul  li{
+   float:left;
+   
+}
+header nav ul li {
+	font-style: italic;
+    font-family: 'Arimo', arial, serif;
+	color: white;
+    display: block;
+    padding: 11px 21px;
+    text-decoration: none;
+}
+header nav ul li:hover {
+    font-weight: 700;
+	background-color: rgba(255, 255, 255, 0.2);
+	background: rgba(255, 255, 255, 0.2);
+}
+header nav ul li  ul {
+    background-color: rgba(255, 255, 255, 0.2);
+	background: rgba(255, 255, 255, 0.2);
+	width:450px;
+}
+
+section.left_column {
+}
+.left_column article{
+	float:left;
+	text-align:right;
+	margin-left: 42px;
+	border: dashed 1px green;
+	padding:5px;
+    font-size: 0.8em;
+    height: 156px;
+	
+}
+.left_column p {
+	float:right;
+}
+.left_column p  a{
+    background-color: red;
+    color: white;
+    display: block;
+    line-height: 22px;
+    margin-top: -24px;	
+	font-weight:700;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase
+}
+
+section.right_column {
+
+}
+.right_column  article{
+	float:right;
+	text-align:left;
+	margin-right: 42px;
+	border: dashed 1px green;
+	padding:5px;
+    font-size: 0.8em;
+    height: 156px;
+}
+.right_column p{
+	float:left;
+}
+.right_column p a{
+    background-color: #1d2e63;
+    color: white;
+    display: block;
+    line-height: 22px;
+    margin-top: -24px;
+	font-weight:700;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase
+}
+
+footer {
+	margin-top:70px;
+}
+footer img {
+	float:left;
+	margin-right:20px;
+}
+footer section:first-child {
+	border-right:solid 1px white;
+	margin-left:0;
+}
+footer section {
+	margin-left:-1px;
+}
+footer section:first-child  p {
+	float: right;
+}
+footer section p {
+    display: block;
+    margin-right: 42px;
+    margin-top: 18px;
+}
+footer section p span {
+   display:block;
+   font-weight:700;
+   font-size:.8em;
+}
+footer section p  .tel {
+	display:inline;
+	float:left;
+	margin-right:5px;
+}
+footer section p .small_text {
+	color:black;
+	font-size:.5em;
+	padding-top:5px;
+}	
+footer section p .tel_small {
+    display: inline;
+    float: left;
+    font-size: 0.7em;
+    margin-right: 5px;
+    margin-top: 3px;
+}
+footer section p  .title {
+	color: #1d2e63;
+	text-transform:uppercase;
+	font-size:.9em;
+}
+footer section p  .last {
+	display:inline;
+}
+footer section p  .adr {
+	color: #1d2e63;
+	text-transform:normal;
+	font-size:.8em;
+}
+footer section p  a{
+	font-style: italic;
+	color:white;
+	text-decoration:none;
+	font-size:.8em;
+}
+footer section ul {
+	height: 11px;
+}
+footer section ul li {
+	float:left;
+	margin-right:5px;
+}
+footer section ul li a {
+	display:block;
+	width:25px;
+	height:25px;
+	text-indent:-9999px;
+}
+footer section ul li a.twitter {
+	background-image: url("../images/social_14.jpg")
+}
+footer section ul li a.facebook {
+	background-image: url("../images/social_16.jpg")
+}
+footer section ul li a.blogger {
+	background-image: url("../images/social_18.jpg")
+}
+
+
+
+
