@@ -1,0 +1,54 @@
+
+/* dropdown.vertical.css - vertical left-to-right direction pure CSS dropdown menu component
+ *
+ * Version: 0.3
+ * Type: strict
+ * Requires: dropdown.css
+ *
+ * (cc) 2006-2008 Tom Lwis (www.lwis.net). Some Rights Reserved.
+ * This style sheet is licensed under a Creative Commons License
+ * http://www.creativecommons.org/licenses/by-nc-sa/3.0/
+ */
+
+@import "dropdown.css";
+
+ul.dropdown.vertical {
+ width: 120px;
+}
+
+ul.dropdown.vertical ul {
+ top: 2px;
+ left: 90%;
+  background-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.2);
+  width: 140px;
+  -webkit-border-bottom-right-radius: 70px;
+-moz-border-radius-bottomright: 70px;
+border-bottom-right-radius: 70px;
+-webkit-border-bottom-left-radius: 0px;
+-moz-border-radius-bottomleft: 0px;
+border-bottom-left-radius: 0px;
+}
+
+ul.dropdown.vertical > li {
+ float: none;
+}
+
+ul.dropdown.vertical > li :hover ul  li{
+ background:none;
+ text-align:left;
+ margin-bottom:2px;
+ margin-top:2px;
+}
+ul.dropdown.vertical ul  li a{
+ width:120px;
+ text-align:left;
+ text-decoration:none;
+ font-weight:bold;
+ color:white;
+ padding-bottom:2px;
+ padding-top:2px;
+}
+ul.dropdown.vertical ul  li a:hover{
+ color: #142671;
+}
