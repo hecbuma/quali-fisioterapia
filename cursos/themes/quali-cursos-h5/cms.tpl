@@ -50,7 +50,7 @@
 		<ul>
 			{foreach from=$cms_pages item=cmspages}
 		    	<li>
-			    • <a href="{$link->getCMSLink($cmspages.id_cms, $cmspages.link_rewrite)|escape:'htmlall':'UTF-8'}">{$cmspages.meta_title|escape:'htmlall':'UTF-8'}</a>
+			    <a href="{$link->getCMSLink($cmspages.id_cms, $cmspages.link_rewrite)|escape:'htmlall':'UTF-8'}">{$cmspages.meta_title|escape:'htmlall':'UTF-8'}</a>
 		        </li>
 			{/foreach}
 		</ul>

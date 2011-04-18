@@ -45,37 +45,37 @@
 		  <li><a href="/">Home</a></li>
 		  <li>Rio de janeiro
 			<ul>
-				<li>CONTATO QUALI CLÕNICAS</li>	
+				<li>CONTATO QUALI CL√çNICAS</li>	
 				<li>Centro de Qualidade de Vida e Fisioterapia Rio de Janeiro</li>	
-				<li>Av. Marechal Floriano, 22 - 2∞ Andar</li>	
+				<li>Av. Marechal Floriano, 22 - 2¬∞ Andar</li>	
 				<li>Centro | Telefone: (21) 2516.2052</li>	
 				<li>riodejaneiro@qualifisioterapia.com.br</li>	
 			</ul>
 		  </li>
 		  <li>Belo Horizonte
 			<ul class="rigth3">
-				<li>CONTATO QUALI CLÕNICAS</li>	
+				<li>CONTATO QUALI CL√çNICAS</li>	
 				<li>Centro de Qualidade de Vida e Fisioterapia Belo Horizonte</li>	
-				<li>Av. Brasil, 84 - Loja 10 - EdifÌcio Brasil Center</li>	
-				<li>Sta EfigÍnia - 40.295-140 | Telefone: (31) 3241.6167</li>	
+				<li>Av. Brasil, 84 - Loja 10 - Edif√≠cio Brasil Center</li>	
+				<li>Sta Efig√™nia - 40.295-140 | Telefone: (31) 3241.6167</li>	
 				<li>belohorizonte@qualifisioterapia.com.br</li>	
 			</ul>
 		  </li>
 		  <li>Vitoria
 			<ul class="rigth2">
-				<li>CONTATO QUALI CLÕNICAS</li>	
-				<li>Centro de Qualidade de Vida e Fisioterapia VitÛria</li>	
-				<li>Rua Eng. Guilherme JosÈ Monjardim Varej„o, 340</li>	
-				<li>Enseada do Su· | Telefone: (27) 3314.2638</li>	
+				<li>CONTATO QUALI CL√çNICAS</li>	
+				<li>Centro de Qualidade de Vida e Fisioterapia Vit√≥ria</li>	
+				<li>Rua Eng. Guilherme Jos√© Monjardim Varej√£o, 340</li>	
+				<li>Enseada do Su√° | Telefone: (27) 3314.2638</li>	
 				<li>vitoria@qualifisioterapia.com.br</li>	
 			</ul>
 		  </li>
 		  <li>Salvador
 			<ul class="rigth1">
-				<li>CONTATO QUALI CLÕNICAS</li>	
+				<li>CONTATO QUALI CL√çNICAS</li>	
 				<li>Centro de Qualidade de Vida e Fisioterapia Salvador</li>	
-				<li>Av. Juracy Magalh„es Jr, 2490 - Salas 505/508</li>	
-				<li>C. MÈdico Salvador | Horto Florestal | Telefone: (71) 3018.4152</li>	
+				<li>Av. Juracy Magalh√£es Jr, 2490 - Salas 505/508</li>	
+				<li>C. M√©dico Salvador | Horto Florestal | Telefone: (71) 3018.4152</li>	
 				<li>salvador@qualifisioterapia.com.br</li>	
 			</ul>
 		  </li>
@@ -84,7 +84,7 @@
 	</header>
 	<section class="left_column span-12">
 		<article class="span-5">
-			Nossos cursos s„o totalmente direcionados para o tratamento. Existe todo um planejamento did·tico/pr·tico para que o aluno possa aprender os mÈtodos e tÈcnicas e aplic·-las no tratamento dos pacientes com grande especificidade. 
+			Nossos cursos s√£o totalmente direcionados para o tratamento. Existe todo um planejamento did√°tico/pr√°tico para que o aluno possa aprender os m√©todos e t√©cnicas e aplic√°-las no tratamento dos pacientes com grande especificidade. 
 		</article>
 		<p >
 		    <img src="/cursos/themes/quali-cursos-h5/images/home_07.png">
@@ -93,17 +93,17 @@
 	</section>
 	<section class="right_column span-12 last">
 		<article class="span-5">
-			Nossos cursos s„o totalmente direcionados para o tratamento. Existe todo um planejamento did·tico/pr·tico para que o aluno possa aprender os mÈtodos e tÈcnicas e aplic·-las no tratamento dos pacientes com grande especificidade. 
+			Nossos cursos s√£o totalmente direcionados para o tratamento. Existe todo um planejamento did√°tico/pr√°tico para que o aluno possa aprender os m√©todos e t√©cnicas e aplic√°-las no tratamento dos pacientes com grande especificidade. 
 		</article>
 		<p>
 		    <img src="/cursos/themes/quali-cursos-h5/images/home_09.png">
-			<a href="/clinicas/">ClÌnicas</a>
+			<a href="/clinicas/">Cl√≠nicas</a>
 		</p>
 	</section>
 
-	<footer class="span-24 with_white_bk">
+	<footer class="span-24">
 		<section class="span-12">
-			<img src="/cursos/themes/quali-cursos-h5/images/logo-rodape-fundo-branco.png">
+			<img src="/cursos/themes/quali-cursos-h5/images/logo-rodape-fundo-laranja.png">
 			<p>
 				<span class="title">Central de Atendimento Quali</span>
 				<span class="tel">0800.282.9732</span><span class="small_text">Todo a Brasil (exeto Rio de Janeiro)</span>
