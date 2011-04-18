@@ -22,9 +22,9 @@ ul.dropdown ul {
  top: 100%;
  left: 0;
  z-index: 597;
- width: 400px;
+ width: 350px;
  padding: 10px 0 10px 10px;
- font-size:.8em;
+ font-size:1.0em;
 -webkit-border-bottom-left-radius: 10px;
 -moz-border-radius-bottomleft: 12px;
 border-bottom-left-radius: 12px;
@@ -40,7 +40,7 @@ ul.dropdown ul.rigth3 {
 }
 
 ul.dropdown ul  li{
-  padding:3px;
+  padding:2px;
 }
 ul.dropdown ul  li:hover {
   background:none;
@@ -53,6 +53,8 @@ ul.dropdown ul ul {
 ul.dropdown li {
  position: relative;
  z-index: 598;
+ font-size:0.85em;
+ font-weight:bold;
 }
 
 ul.dropdown li:hover {
