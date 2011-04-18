@@ -1,8 +1,10 @@
-                 <h1 class="grande">Cursos</h1>
+              <section class="cursos span-24">
+		<h2 class="span-21">Cursos</h2>
+		<ul>
+			<li><a href="/cursos/content/category/2-agenda"><img src="{$base_dir_ssl}themes/quali-cursos-h5/images/cursos-ico-agenda.png" /></a></li>
+			<li><a href="/cursos/content/18-ministrantes"><img src="{$base_dir_ssl}themes/quali-cursos-h5/images/cursos-ico-ministrantes.png" /></a></li>
+			<li><a href="/cursos/content/19-vatagens"><img src="{$base_dir_ssl}themes/quali-cursos-h5/images/cursos-ico-vantagens.png" /></a></li>
+			<li><a href="/cursos/1-inscreva-se"><img src="{$base_dir_ssl}themes/quali-cursos-h5/images/cursos-ico-inscreva-se.png" /></a></li>
+		</ul>
+	        </section>
 
-                 <ul id="icones-destaque">
-                    <li class="agenda"><a href="/cursos/content/category/2-agenda">Agenda</a></li>
-                    <li class="ministrantes"><a href="/cursos/content/18-ministrantes">Ministrantes</a></li>
-                    <li class="vantagens"><a href="/cursos/content/19-vatagens">Vantagens</a></li>
-                    <li class="inscreva-se"><a href="/cursos/1-inscreva-se">Inscreva-se</a></li>
-                </ul>
