@@ -324,6 +324,7 @@ section.cursos-secondary h2 {
 section.cursos-secondary ul.dropdown {
 	clear:left;
 	z-index:600;
+	float:left;
 }
 section.cursos-secondary ul.dropdown li {
 	margin:10px 0;
@@ -357,7 +358,8 @@ section.cursos-secondary ul.dropdown  li:hover {
 }
 section.cursos-secondary ul.dropdown li a {
 	display:block;
-	width:190px;
+	text-decoration:none;
+	color:white;
 }
 
 section.cursos-secondary ul.dropdown ul.submenu {
@@ -371,6 +373,23 @@ section.cursos-secondary ul.dropdown ul.submenu  li{
 }
 section.cursos-secondary p {
 	padding-right:50px;
+	float:left;
+}
+section.cursos-secondary  .registration {
+	float:right;
+	height:200px;
+	padding-right:20px;
+	
+}
+section.cursos-secondary  .registration a {
+	display:block;
+	color:white;
+	text-decoration:none;
+	text-transform:uppercase;
+	padding:5px;
+	width:100%;
+	background-color: #1d2e63;
+	text-align:center;
 }
 
 
@@ -386,15 +405,35 @@ section.cursos-info {
    scrollbar-3dlight-color:#808080;
    scrollbar-darkshadow-Color:#202020;
 }
+section.cursos-info h2 {
+	text-transform: uppercase;
+	margin-bottom: 20px;
+	font-weight: bold;
+	color: #1d2e63;
+	font-size:1.5em;
+}
+section.cursos-info h2  span {
+ display:block;
+ font-size:.8em;
+}
 section.cursos-info h3 {
 	text-transform: uppercase;
 	margin-bottom: 20px;
+	font-weight: bold;
 }
 section.cursos-info ul {
 }
 section.cursos-info ul li {
 	color: #1d2e63;
 	list-style: disc inside none;
+	text-transform:normal;
+	margin-bottom:3px;
+}
+section.cursos-info ul li a {
+	text-decoration:none;
+	text-transform:normal;
+	margin-bottom:3px;
+	color: #1d2e63;
 }
 
 
