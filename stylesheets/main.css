@@ -1,7 +1,26 @@
 body {
-  background-color: #e78f14 ;
+  
+  background-color: #e8e8e9 ;
   font-family: 'Arimo', arial, serif;
   color:white;
+}
+.container {
+	background-image: -webkit-gradient(
+		linear,
+		right bottom,
+		left bottom,
+		color-stop(0.17, #E77817),
+		color-stop(0.47, #E7A713),
+		color-stop(0.79, #E78C16)
+	);
+	background-image: -moz-linear-gradient(
+		right center,
+		#E77817 17%,
+		#E7A713 47%,
+		#E78C16 79%
+	);
+    border: 2px solid white;
+    margin-top: 30px;
 }
 header {
 margin-bottom:50px;
@@ -9,7 +28,7 @@ margin-bottom:50px;
 }
 
 header h1 {
-    margin: 44px 0 0 78px;
+    margin: 44px 0 0 47px;
 	background-image: url(../images/logo-marca-dagua-fundo-laranja.png);
 	width: 195px;
 	height: 79px;
@@ -136,24 +155,28 @@ section.right_column {
 
 footer {
 	margin-top:70px;
+	padding-bottom:20px;
+	padding-top:10px;
 }
 footer img {
 	float:left;
 	margin-right:20px;
+	margin-left:40px;
 }
 footer section:first-child {
 	border-right:solid 1px white;
 	margin-left:0;
+	padding-right:6px;
 }
 footer section {
-	margin-left:-1px;
+	margin-left:-7px;
 }
 footer section:first-child  p {
 	float: right;
 }
 footer section p {
     display: block;
-    margin-right: 42px;
+    margin-right: 17px;
     margin-top: 18px;
 }
 footer section p span {
@@ -186,10 +209,13 @@ footer section p  .title {
 footer section p  .last {
 	display:inline;
 }
+footer .last {
+	margin-left:10px;
+}
 footer section p  .adr {
 	color: #1d2e63;
 	text-transform:normal;
-	font-size:.8em;
+	font-size:.7em;
 }
 footer section p  a{
 	font-style: italic;
@@ -220,6 +246,48 @@ footer section ul li a.blogger {
 	background-image: url("../images/social_18.jpg")
 }
 
+footer.with_white_bk {
+	background-color:#ffffff;
+	-webkit-border-top-right-radius: 90px;
+	-moz-border-radius-topright: 90px;
+	border-top-right-radius: 90px;
+}
+footer.with_white_bk section:first-child {
+	border-right:solid 1px #E77817;
+}
+footer.with_white_bk section p span.tel, footer.with_white_bk section p span.tel_small, footer.with_white_bk section a {
+	color: #E77817;
+	
+}
 
+/*-----------------   CURSOS   --------------------------*/
+section.cursos {
+
+}
+
+section.cursos h2 {
+    background-color: rgba(255, 255, 255, 0.2);
+	background: rgba(255, 255, 255, 0.2);
+    font-size: 1.8em;
+    font-style: italic;
+    font-weight: bold;
+    margin-bottom: 20px;
+    padding: 10px;
+    text-align: right;
+	color: rgba(255, 255, 255, 0.8);
+	
+	-webkit-border-top-right-radius: 22px;
+	-webkit-border-bottom-right-radius: 22px;
+	-moz-border-radius-topright: 22px;
+	-moz-border-radius-bottomright: 22px;
+	border-top-right-radius: 22px;
+	border-bottom-right-radius: 22px;
+}
+section.cursos ul {
+}
+section.cursos ul  li{
+	float:left;
+	margin:0 10px;
+}
 
 
