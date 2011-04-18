@@ -2,7 +2,7 @@
 
 	<footer class="span-24 with_white_bk">
 		<section class="span-12">
-			<img src="{$base_dir_ssl}themes/quali-cursos-h5/images/logo-rodape-fundo-branco.png">
+			<img src="/cursos/themes/quali-cursos-h5/images/logo-rodape-fundo-branco.png">
 			<p>
 				<span class="title">Central de Atendimento Quali</span>
 				<span class="tel">0800.282.9732</span><span class="small_text">Todo a Brasil (exeto Rio de Janeiro)</span>

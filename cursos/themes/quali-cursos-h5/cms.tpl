@@ -1,12 +1,22 @@
-  <h1>Cursos</h1>
-
-                <ul id="menu-lateral">
-                    <li><a href="/cursos/content/category/2-agenda">Agenda</a></li>
-                    <li><a href="/cursos/content/18-ministrantes">Ministrantes</a></li>
-                    <li><a href="/cursos/content/19-vatagens">Vantagens</a></li>
-                    <li><a href="/cursos/1-inscreva-se">Inscreva-se</a></li>
-                    <li><a href="javascript:history.go(-1)">Voltar</a></li>
-                </ul>
+        <section class="cursos-secondary span-12">
+		<h2 class="span-3">Cursos</h2>
+		<ul class="dropdown vertical">
+			<li class="menu">Agenda
+				<ul class="submenu">
+					<li><a href="">Mensual</a></li>
+					<li><a href="">Regional</a></li>
+					<li><a href="/cursos/content/category/2-agenda">Todos os Cursos</a></li>
+				</ul>
+			</li>
+			<li><a href="/cursos/content/18-ministrantes">Ministrantes</a></li>
+                        <li><a href="/cursos/content/19-vatagens">Vantagens</a></li>
+                        <li><a href="/cursos/1-inscreva-se">Inscreva-se</a></li>
+                        <li><a href="javascript:history.go(-1)">Voltar</a></li>
+		</ul>   
+		<p>
+			Todos os nossos cursos encontram-se de acordo com a Legislação do COFFITO e do CNE.
+		</p>
+	</section>
                 
 {if $cms->id != $cgv_id}
 	{include file="$tpl_dir./breadcrumb.tpl"}
@@ -28,25 +38,25 @@
 	<!--<div class="rte{if $content_only} content_only{/if}">
 		{$cms->content}
 	</div>-->
-        
-                <div id="detalhes-cursos">
-                    <h2>{$cms->meta_title|escape:'htmlall':'UTF-8'}</h2>
-                    {$cms->content}
-                </div>
+          <section class="cursos-info span-12 last">
+		<h3>{$cms->meta_title|escape:'htmlall':'UTF-8'}</h3>
+		{$cms->content}
+	</section>
 
 {elseif isset($category)}
 
-        <div id="lista-cursos">
-            <h2>TODOS OS CURSOS</h2>
-                	<ul>
-				{foreach from=$cms_pages item=cmspages}
-					<li>
-					• <a href="{$link->getCMSLink($cmspages.id_cms, $cmspages.link_rewrite)|escape:'htmlall':'UTF-8'}">{$cmspages.meta_title|escape:'htmlall':'UTF-8'}</a>
-					</li>
-				{/foreach}
-			</ul>
+        <section class="cursos-info span-12 last">
+		<h3>Todos os Cursos</h3>
+		<ul>
+			{foreach from=$cms_pages item=cmspages}
+		    	<li>
+			    • <a href="{$link->getCMSLink($cmspages.id_cms, $cmspages.link_rewrite)|escape:'htmlall':'UTF-8'}">{$cmspages.meta_title|escape:'htmlall':'UTF-8'}</a>
+		        </li>
+			{/foreach}
+		</ul>
+	</section>
 
-                </div>
+
 <!--
 	<div>
 		<h1>{$category->name|escape:'htmlall':'UTF-8'}</h1>
@@ -76,7 +86,4 @@
 {/if}
 
 
-            <div style="clear:both;"></div>
-            <div id="cursos-aviso" class="font-azul">
-               <b>Todos os nossos cursos encontram-se de acordo com a Legislação do COFFITO e do CNE.</b> 
-            </div>
+

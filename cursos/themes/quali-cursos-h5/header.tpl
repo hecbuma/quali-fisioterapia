@@ -32,13 +32,14 @@
 {/if}
 		{$HOOK_HEADER}
 
-        <script src="javascripts/modernizr-1.7.min.js"></script>
+        <script src="/cursos/themes/quali-cursos-h5/javascripts/modernizr-1.7.min.js"></script>
         <link rel="stylesheet" href="http://meyerweb.com/eric/tools/css/reset/reset.css" type="text/css" media="screen, projection">
-        <link rel="stylesheet" href="{$base_dir_ssl}themes/quali-cursos-h5/stylesheets/blueprint/screen.css" type="text/css" media="screen, projection">
-        <link rel="stylesheet" href="{$base_dir_ssl}themes/quali-cursos-h5/stylesheets/blueprint/print.css" type="text/css" media="print">
-        <link rel="stylesheet" href="{$base_dir_ssl}themes/quali-cursos-h5/stylesheets/main.css" type="text/css" media="screen, projection">
-        <link rel="stylesheet" href="{$base_dir_ssl}themes/quali-cursos-h5/stylesheets/dropdown.css" type="text/css" media="screen, projection">
-        <!--[if lt IE 8]><link rel="stylesheet" href="{$base_dir_ssl}themes/quali-cursos-h5/stylesheets/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
+        <link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/blueprint/screen.css" type="text/css" media="screen, projection">
+        <link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/blueprint/print.css" type="text/css" media="print">
+        <link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/main.css" type="text/css" media="screen, projection">
+        <link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/dropdown.css" type="text/css" media="screen, projection">
+        <link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/dropdown.vertical.css" type="text/css" media="screen, projection">
+        <!--[if lt IE 8]><link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
         <link href='http://fonts.googleapis.com/css?family=Arimo:regular,italic,bold,bolditalic' rel='stylesheet' type='text/css'>
 
 	<script type="text/javascript">
@@ -66,8 +67,8 @@
 			<ul>
 				<li>CONTATO QUALI CLÍNICAS</li>	
 				<li>Centro de Qualidade de Vida e Fisioterapia Rio de Janeiro</li>	
-				<li>Av. Marechal Floriano, 22 - 2° Andar - Centro</li>	
-				<li>Telefone: (21) 2516.2052</li>	
+				<li>Av. Marechal Floriano, 22 - 2° Andar</li>	
+				<li>Centro | Telefone: (21) 2516.2052</li>	
 				<li>riodejaneiro@qualifisioterapia.com.br</li>	
 			</ul>
 		  </li>
@@ -94,7 +95,7 @@
 				<li>CONTATO QUALI CLÍNICAS</li>	
 				<li>Centro de Qualidade de Vida e Fisioterapia Salvador</li>	
 				<li>Av. Juracy Magalhães Jr, 2490 - Salas 505/508</li>	
-				<li>Centro Médico Salvador | Horto Florestal | Telefone: (71) 3018.4152</li>	
+				<li>C. Médico Salvador | Horto Florestal | Telefone: (71) 3018.4152</li>	
 				<li>salvador@qualifisioterapia.com.br</li>	
 			</ul>
 		  </li>
