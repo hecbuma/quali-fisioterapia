@@ -376,7 +376,15 @@ section.cursos-secondary p {
 
 section.cursos-info {
 	height:280px;
-	overflow:scroll;
+	overflow-y:scroll;
+
+	  scrollbar-face-color:#903030;
+   scrollbar-arrow-color:#FFFFFF;
+   scrollbar-track-color:#C0B0B0;
+   scrollbar-shadow-color:rgb(0,0,0);
+   scrollbar-highlight-color:rgb(0,0,0);
+   scrollbar-3dlight-color:#808080;
+   scrollbar-darkshadow-Color:#202020;
 }
 section.cursos-info h3 {
 	text-transform: uppercase;
@@ -385,7 +393,8 @@ section.cursos-info h3 {
 section.cursos-info ul {
 }
 section.cursos-info ul li {
-
+	color: #1d2e63;
+	list-style: disc inside none;
 }
 
 
