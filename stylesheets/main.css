@@ -78,13 +78,18 @@ header nav  ul  li{
    float:left;
    
 }
-header nav ul li {
+header nav ul li  {
 	font-style: italic;
     font-family: 'Arimo', arial, serif;
 	color: white;
     display: block;
     padding: 11px 21px;
     text-decoration: none;
+	line-height:30px;
+}
+header nav ul li  a {
+  text-decoration: none;
+  color:white;  
 }
 header nav ul li:hover {
     font-weight: 700;
@@ -95,6 +100,13 @@ header nav ul li  ul {
     background-color: rgba(255, 255, 255, 0.2);
 	background: rgba(255, 255, 255, 0.2);
 	width:450px;
+}
+header nav ul li  ul  li {
+	margin-top:0;
+	margin-bottom:0;
+	padding-top:0;
+	padding-bottom:0;
+	line-height:10px;
 }
 
 section.left_column {
@@ -290,5 +302,93 @@ section.cursos ul  li{
 	float:left;
 	margin:0 10px;
 }
+/*------------------------ CURSOS secondary ----------------*/
+section.cursos-secondary h2 {
+    background-color: rgba(255, 255, 255, 0.2);
+	background: rgba(255, 255, 255, 0.2);
+    font-size: 1.8em;
+    font-style: italic;
+    font-weight: bold;
+    margin-bottom: 20px;
+    padding: 10px;
+    text-align: right;
+	color: rgba(255, 255, 255, 0.8);
+	
+	-webkit-border-top-right-radius: 22px;
+	-webkit-border-bottom-right-radius: 22px;
+	-moz-border-radius-topright: 22px;
+	-moz-border-radius-bottomright: 22px;
+	border-top-right-radius: 22px;
+	border-bottom-right-radius: 22px;
+}
+section.cursos-secondary ul.dropdown {
+	clear:left;
+	z-index:600;
+}
+section.cursos-secondary ul.dropdown li {
+	margin:10px 0;
+	padding: 5px;
+	width:120;
+	z-index:600;
+	-webkit-border-bottom-right-radius: 30px;
+	-moz-border-radius-bottomright: 30px;
+	border-bottom-right-radius: 30px;
+	background: #142671;
+
+	background-image: -webkit-gradient(
+		linear,
+		left top,
+		right top,
+		color-stop(0, #152672),
+		color-stop(0.51, #2F3EAD),
+		color-stop(0.95, #152672)
+	);
+	background-image: -moz-linear-gradient(
+		left center,
+		#152672 0%,
+		#2F3EAD 51%,
+		#152672 95%
+	);
+}
+section.cursos-secondary ul.dropdown  li:hover {
+	width:140px;
+	text-align:right;
+	padding-right:20px;
+}
+section.cursos-secondary ul.dropdown li a {
+	display:block;
+	width:190px;
+}
+
+section.cursos-secondary ul.dropdown ul.submenu {
+	z-index:0;
+}
+section.cursos-secondary ul.dropdown ul.submenu  li{
+    z-index:  0;
+	background:none;
+ margin-bottom:2px;
+ margin-top:2px;
+}
+section.cursos-secondary p {
+	padding-right:50px;
+}
+
+
+section.cursos-info {
+	height:280px;
+	overflow:scroll;
+}
+section.cursos-info h3 {
+	text-transform: uppercase;
+	margin-bottom: 20px;
+}
+section.cursos-info ul {
+}
+section.cursos-info ul li {
+
+}
+
+
+
 
 
