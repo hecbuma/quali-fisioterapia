@@ -4,6 +4,11 @@ body {
   font-family: 'Arimo', arial, serif;
   color:white;
 }
+body.blue-bkg {
+  
+  background-color: #E77817 ;
+
+}
 .container {
 	background-image: -webkit-gradient(
 		linear,
@@ -22,6 +27,24 @@ body {
     border: 2px solid white;
     margin-top: 30px;
 }
+body.blue-bkg .container {
+background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(0.33, #E6E6E7),
+    color-stop(0.55, #F1F1F1),
+    color-stop(0.75, #E6E6E7)
+);
+background-image: -moz-linear-gradient(
+    center bottom,
+    #E6E6E7 33%,
+    #F1F1F1 55%,
+    #E6E6E7 75%
+);
+
+}
+
 header {
 margin-bottom:50px;
 
@@ -169,6 +192,9 @@ footer {
 	margin-top:70px;
 	padding-bottom:20px;
 	padding-top:10px;
+	-webkit-box-shadow: 2px -2px 6px #121112;
+	-moz-box-shadow: 2px -2px 6px #121112;
+	box-shadow: 2px -2px 6px #121112;
 }
 footer img {
 	float:left;
@@ -435,7 +461,95 @@ section.cursos-info ul li a {
 	margin-bottom:3px;
 	color: #1d2e63;
 }
+/*---------------------- inscreverse-se section -----------------------*/
 
+section.inscrever-se {
+}
+section.inscrever-se article.curso-description {
+	
+}
+section.inscrever-se .inscrever-se-img{
+	margin-right:40px;
+}
+section.inscrever-se .inscrever-se-img img{
+	-webkit-box-shadow: 2px 0px 13px #121112;
+	-moz-box-shadow: 2px 0px 13px #121112;
+	box-shadow: 2px 0px 13px #121112;
+	-webkit-border-top-left-radius: 53px;
+	-moz-border-radius-topleft: 53px;
+	border-top-left-radius: 53px;
+}
+article.curso-description h2 {
+    color: #E77817;
+    font-size: 1.3em;
+    font-weight: bold;
+
+}
+article.curso-description  p.push_bottom {
+	margin-bottom:30px;
+}
+article.curso-description p {
+	color:#1d2e63;
+}
+
+article.curso-description  .curso-date {
+	float:left;
+	color:#1d2e63;
+	width:400px;
+	margin-bottom: 15px;
+}
+article.curso-description  .curso-date p {
+	font-size: 0.9em;
+    font-style: italic;
+    text-transform: uppercase;
+	margin-bottom: 3px;
+}
+article.curso-description  .curso-date p  span{
+    background-color: white;
+    display: inline-block;
+    font-style: normal;
+    padding: 4px;
+    text-transform: none;
+    width: 64%;
+}
+article.curso-description  .curso-date p  span:first-child{
+    color:white;
+	background-color:#1d2e63;
+	width: 20%;
+	text-transform: uppercase;
+}
+
+article.curso-description table {
+    border-collapse: separate;
+    border-spacing: 3px;
+    font-size: 0.9em;
+}
+
+article.curso-description table  caption{
+	color:#1d2e63;
+	font-size:.7em;
+	text-transform: uppercase;
+	font-style:italic;
+	font-weight:bold;
+}
+article.curso-description table  tr {
+	
+
+}
+article.curso-description table  tr td:first-child{
+    color:white;
+	background-color:#1d2e63;
+	
+}
+article.curso-description table  tr td{
+    color:#E77817;
+	padding:3px;
+
+}
+article.curso-description  .cards {
+    margin-left: 18px;
+    margin-top: 17px;
+}
 
 
 
