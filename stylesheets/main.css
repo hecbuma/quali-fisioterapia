@@ -9,7 +9,7 @@ body.blue-bkg {
   background-color: #E77817 ;
 
 }
-.container {
+  .container {
 	background-image: -webkit-gradient(
 		linear,
 		right bottom,
@@ -24,9 +24,11 @@ body.blue-bkg {
 		#E7A713 47%,
 		#E78C16 79%
 	);
-    border: 2px solid white;
+    border:solid 2px white;
     margin-top: 30px;
 }
+
+
 body.blue-bkg .container {
 background-image: -webkit-gradient(
     linear,
@@ -64,7 +66,7 @@ header section#logo {
 header nav {
     font-family: 'Arimo', arial, serif;
     height: 53px;
-	background: #142671;
+	background-color: #142671;
 	-webkit-border-bottom-left-radius: 127px;
 	-moz-border-radius-bottomleft: 127px;
 	border-bottom-left-radius: 127px;
@@ -144,7 +146,6 @@ section.left_column {
 	float:left;
 	text-align:right;
 	margin-left: 42px;
-	border: dashed 1px green;
 	padding:5px;
     font-size: 0.8em;
     height: 156px;
@@ -173,7 +174,6 @@ section.right_column {
 	float:right;
 	text-align:left;
 	margin-right: 42px;
-	border: dashed 1px green;
 	padding:5px;
     font-size: 0.8em;
     height: 156px;

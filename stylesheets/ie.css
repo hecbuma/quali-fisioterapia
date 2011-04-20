@@ -1,0 +1,50 @@
+.container {
+	background-color:orange;
+}
+body.blue-bkg .container {
+   background-color:#E6E6E7;
+}
+header nav {
+	background: url('../images/nav-bk.png') transparent no-repeat right top;
+
+}
+header nav ul li:hover, header nav ul li  ul  {
+	background-image: url('../images/trans.png')
+}
+
+footer {
+	height:70px;
+}
+footer section:first-child  p {
+	margin-top:-50px;
+}
+footer section p  .adr {
+	color: #1d2e63;
+	text-transform:normal;
+	font-size:9px;
+}
+
+
+
+section.cursos h2{
+	background-image:url('../images/h2-bk.png');
+	background-repeat: no-repeat;
+}
+section.cursos-secondary h2 {
+	background-image:url('../images/h2-sec.png');
+	background-repeat: no-repeat;
+}
+section.cursos-secondary ul.dropdown li {
+	background-color: orange;
+	background-image:url('../images/side-btn-bk.png');
+	background-position: -60px 0;
+}
+
+section.cursos-secondary ul.dropdown li:hover {
+	background-position: 0 0;
+}
+
+ul.dropdown.vertical ul {
+	background-image:url('../images/submenu-bk.png');
+	background-repeat:no-repeat;
+}

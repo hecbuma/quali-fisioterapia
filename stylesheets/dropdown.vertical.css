@@ -18,10 +18,10 @@ ul.dropdown.vertical {
 
 ul.dropdown.vertical ul {
  top: 2px;
- left: 90%;
+ left: 100%;
   background-color: rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.2);
-  width: 140px;
+  width: 160px;
   -webkit-border-bottom-right-radius: 70px;
 -moz-border-radius-bottomright: 70px;
 border-bottom-right-radius: 70px;
