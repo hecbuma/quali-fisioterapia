@@ -37,7 +37,6 @@
         <link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/blueprint/screen.css" type="text/css" media="screen, projection">
         <link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/blueprint/print.css" type="text/css" media="print">
         <link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/main.css" type="text/css" media="screen, projection">
-        <link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/dropdown.css" type="text/css" media="screen, projection">
         <link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/dropdown.vertical.css" type="text/css" media="screen, projection">
         <!--[if lt IE 8]><link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
         <link href='http://fonts.googleapis.com/css?family=Arimo:regular,italic,bold,bolditalic' rel='stylesheet' type='text/css'>
@@ -52,7 +51,7 @@
 
 	</head>
 	
-	<body {if $page_name}id="{$page_name|escape:'htmlall':'UTF-8'}"{/if}>
+	<body {if $page_name}id="{$page_name|escape:'htmlall':'UTF-8'}"{/if} {if $page_name == 'category'}class="blue-bkg"{/if}>
 
 
   <div class="container ">
@@ -63,7 +62,7 @@
 	  <nav class="span-16 last">
 	    <ul class="prepend-1 dropdown">
 		  <li><a href="/cursos/">Home</a></li>
-		  <li>Rio de janeiro
+		  <li>Rio de Janeiro
 			<ul>
 				<li>CONTATO QUALI CLÍNICAS</li>	
 				<li>Centro de Qualidade de Vida e Fisioterapia Rio de Janeiro</li>	
@@ -94,7 +93,7 @@
 			<ul class="rigth1">
 				<li>CONTATO QUALI CLÍNICAS</li>	
 				<li>Centro de Qualidade de Vida e Fisioterapia Salvador</li>	
-				<li>Av. Juracy Magalhães Jr, 2490 - Salas 505/508</li>	
+				<li>Av. Juracy Magalhães Jr, 2490 - Sls 505/508</li>	
 				<li>C. Médico Salvador | Horto Florestal | Telefone: (71) 3018.4152</li>	
 				<li>salvador@qualifisioterapia.com.br</li>	
 			</ul>

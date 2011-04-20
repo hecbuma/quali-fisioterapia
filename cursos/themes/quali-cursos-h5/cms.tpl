@@ -3,7 +3,7 @@
 		<ul class="dropdown vertical">
 			<li class="menu">Agenda
 				<ul class="submenu">
-					<li><a href="">Mensual</a></li>
+					<li><a href="">Mensal</a></li>
 					<li><a href="">Regional</a></li>
 					<li><a href="/cursos/content/category/2-agenda">Todos os Cursos</a></li>
 				</ul>
@@ -39,7 +39,7 @@
 		{$cms->content}
 	</div>-->
           <section class="cursos-info span-12 last">
-		<h3>{$cms->meta_title|escape:'htmlall':'UTF-8'}</h3>
+           <h2>{$cms->meta_title|escape:'htmlall':'UTF-8'}</h2>
 		{$cms->content}
 	</section>
 

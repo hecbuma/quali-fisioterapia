@@ -114,14 +114,15 @@ header nav ul li  a {
   text-decoration: none;
   color:white;  
 }
+
 header nav ul li:hover {
     font-weight: 700;
 	background-color: rgba(255, 255, 255, 0.2);
 	background: rgba(255, 255, 255, 0.2);
 }
 header nav ul li  ul {
-    background-color: rgba(255, 255, 255, 0.2);
-	background: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.3);
+	background: rgba(255, 255, 255, 0.3);
 	width:450px;
 }
 header nav ul li  ul  li {
@@ -131,6 +132,11 @@ header nav ul li  ul  li {
 	padding-bottom:0;
 	line-height:10px;
 }
+
+body.blue-bkg header nav ul li  ul  li {
+  color:#E77817;  
+}
+
 
 section.left_column {
 }
@@ -189,12 +195,9 @@ section.right_column {
 }
 
 footer {
-	margin-top:70px;
+	margin-top:30px;
 	padding-bottom:20px;
 	padding-top:10px;
-	-webkit-box-shadow: 2px -2px 6px #121112;
-	-moz-box-shadow: 2px -2px 6px #121112;
-	box-shadow: 2px -2px 6px #121112;
 }
 footer img {
 	float:left;
@@ -215,12 +218,13 @@ footer section:first-child  p {
 footer section p {
     display: block;
     margin-right: 17px;
-    margin-top: 18px;
+    margin-top: 10px;
 }
 footer section p span {
    display:block;
    font-weight:700;
    font-size:.8em;
+   margin-bottom:3px;
 }
 footer section p  .tel {
 	display:inline;
@@ -260,6 +264,7 @@ footer section p  a{
 	color:white;
 	text-decoration:none;
 	font-size:.8em;
+        font-weight:bold;
 }
 footer section ul {
 	height: 11px;
@@ -354,14 +359,14 @@ section.cursos-secondary ul.dropdown {
 }
 section.cursos-secondary ul.dropdown li {
 	margin:10px 0;
-	padding: 5px;
+	padding: 7px;
 	width:120;
 	z-index:600;
 	-webkit-border-bottom-right-radius: 30px;
 	-moz-border-radius-bottomright: 30px;
 	border-bottom-right-radius: 30px;
 	background: #142671;
-
+        text-transform:uppercase;
 	background-image: -webkit-gradient(
 		linear,
 		left top,
@@ -380,7 +385,7 @@ section.cursos-secondary ul.dropdown li {
 section.cursos-secondary ul.dropdown  li:hover {
 	width:140px;
 	text-align:right;
-	padding-right:20px;
+	padding-right:40px;
 }
 section.cursos-secondary ul.dropdown li a {
 	display:block;
@@ -398,8 +403,9 @@ section.cursos-secondary ul.dropdown ul.submenu  li{
  margin-top:2px;
 }
 section.cursos-secondary p {
-	padding-right:50px;
+	padding:15px;
 	float:left;
+        color:#1D2E63;
 }
 section.cursos-secondary  .registration {
 	float:right;
@@ -461,7 +467,28 @@ section.cursos-info ul li a {
 	margin-bottom:3px;
 	color: #1d2e63;
 }
+
+section.cursos-info p {
+    line-height:115%;
+    margin-bottom:5px;
+    font-size:.8em;
+}
+
+section.cursos-info #ver-turmas {
+    color: #1d2e63;
+    text-decoration:none;
+    font-weight:bold;
+}
+
 /*---------------------- inscreverse-se section -----------------------*/
+
+body.blue-bkg header h1 {
+         margin: 0;
+	background-image: url(../images/canto-inscreva-se.png);
+	width: 413px;
+	height: 132px;
+	text-indent: -9999px;
+}
 
 section.inscrever-se {
 }
@@ -471,14 +498,7 @@ section.inscrever-se article.curso-description {
 section.inscrever-se .inscrever-se-img{
 	margin-right:40px;
 }
-section.inscrever-se .inscrever-se-img img{
-	-webkit-box-shadow: 2px 0px 13px #121112;
-	-moz-box-shadow: 2px 0px 13px #121112;
-	box-shadow: 2px 0px 13px #121112;
-	-webkit-border-top-left-radius: 53px;
-	-moz-border-radius-topleft: 53px;
-	border-top-left-radius: 53px;
-}
+
 article.curso-description h2 {
     color: #E77817;
     font-size: 1.3em;
@@ -496,7 +516,7 @@ article.curso-description  .curso-date {
 	float:left;
 	color:#1d2e63;
 	width:400px;
-	margin-bottom: 15px;
+	margin-bottom: 10px;
 }
 article.curso-description  .curso-date p {
 	font-size: 0.9em;
@@ -505,12 +525,10 @@ article.curso-description  .curso-date p {
 	margin-bottom: 3px;
 }
 article.curso-description  .curso-date p  span{
-    background-color: white;
     display: inline-block;
     font-style: normal;
     padding: 4px;
     text-transform: none;
-    width: 64%;
 }
 article.curso-description  .curso-date p  span:first-child{
     color:white;
@@ -539,16 +557,21 @@ article.curso-description table  tr {
 article.curso-description table  tr td:first-child{
     color:white;
 	background-color:#1d2e63;
+        font-weight:normal;
+        font-size:.9em;
 	
 }
 article.curso-description table  tr td{
     color:#E77817;
 	padding:3px;
-
+        text-align:right;
+        font-weight:bold;
 }
 article.curso-description  .cards {
     margin-left: 18px;
     margin-top: 17px;
+    margin-right: 30px;
+    float:right;
 }
 
 

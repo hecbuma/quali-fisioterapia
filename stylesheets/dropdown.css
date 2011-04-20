@@ -29,8 +29,10 @@ ul.dropdown ul {
 -moz-border-radius-bottomleft: 12px;
 border-bottom-left-radius: 12px;
 }
+
 ul.dropdown ul.rigth1 {
- left:-260px;;
+ left:-275px;;
+ width:365px;
 }
 ul.dropdown ul.rigth2 {
  left:-275px;;
