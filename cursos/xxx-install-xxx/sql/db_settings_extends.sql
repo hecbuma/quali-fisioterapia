@@ -66,7 +66,7 @@ INSERT INTO `PREFIX_hook_module` (`id_module`, `id_hook`, `position`) VALUES (3,
 (35, 33, 2),(36, 33, 3),(37, 33, 4),(39, 37, 1),(40, 32, 8),(41, 32, 9),(42, 32, 10),(43, 32, 11),(42, 14, 6),(43, 14, 7),(44, 32, 12),(45, 32, 13),(46, 32, 15),
 (47, 32, 14),(48, 32, 16),(49, 32, 17),(55, 32, 22),(50, 32, 18),(51, 32, 19),(51, 45, 1),(25, 25, 1),(41, 20, 2),(52, 32, 20),(53, 32, 21),(17, 9, 2),(18, 9, 3),(24, 9, 4),(9, 9, 5),
 (15, 9, 6),(5, 9, 7),(8, 9, 8),(10, 9, 9),(20, 9, 10),(11, 9, 11),(16, 9, 12),(22, 9, 13),(13, 9, 14),(14, 9, 15),(12, 9, 16),(7, 9, 17),(21, 9, 18),(10, 60, 1),(10, 61, 1),(10, 62, 1),(54, 9, 19)
-,(10,65,1);
+,(10,65,1), (10,66,1);
 
 CREATE TABLE `PREFIX_pagenotfound` (
   `id_pagenotfound` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -93,28 +93,28 @@ CREATE TABLE `PREFIX_sekeyword` (
 
 
 CREATE TABLE `PREFIX_cms_block` (
-	`id_block_cms` int(10) unsigned NOT NULL auto_increment,
+	`id_cms_block` int(10) unsigned NOT NULL auto_increment,
 	`id_cms_category` int(10) unsigned NOT NULL,
 	`name` varchar(40) NOT NULL,
 	`location` tinyint(1) unsigned NOT NULL,
 	`position` int(10) unsigned NOT NULL default '0',
 	`display_store` tinyint(1) NOT NULL DEFAULT '1',
-	PRIMARY KEY (`id_block_cms`)
+	PRIMARY KEY (`id_cms_block`)
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8;
 
 CREATE TABLE `PREFIX_cms_block_page` (
-	`id_block_cms_page` int(10) unsigned NOT NULL auto_increment,
-	`id_block_cms` int(10) unsigned NOT NULL,
+	`id_cms_block_page` int(10) unsigned NOT NULL auto_increment,
+	`id_cms_block` int(10) unsigned NOT NULL,
 	`id_cms` int(10) unsigned NOT NULL,
 	`is_category` tinyint(1) unsigned NOT NULL,
-	PRIMARY KEY (`id_block_cms_page`)
+	PRIMARY KEY (`id_cms_block_page`)
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8;
 
 CREATE TABLE `PREFIX_cms_block_lang` (
-	`id_block_cms` int(10) unsigned NOT NULL,
+	`id_cms_block` int(10) unsigned NOT NULL,
 	`id_lang` int(10) unsigned NOT NULL,
 	`name` varchar(40) NOT NULL default '',
-	PRIMARY KEY (`id_block_cms`, `id_lang`)
+	PRIMARY KEY (`id_cms_block`, `id_lang`)
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8;
 
 CREATE TABLE `PREFIX_editorial` (
@@ -245,7 +245,7 @@ INSERT INTO `PREFIX_category_lang` (`id_category`, `id_lang`, `name`, `descripti
 (2, 3, 'iPods', 'Es hora de que el mejor jugador de la música, al escenario para hacer un bis. Con el nuevo iPod, el mundo es tu escenario.', 'musica-ipods', '', '', ''),
 (2, 4, 'iPods', 'Now that you can buy movies from the iTunes Store and sync them to your iPod, the whole world is your theater.', 'musik-iPods', '', '', ''),
 (3, 4, 'Zubehör', 'Wonderful accessories for your iPod', 'zubehor-ipod', '', '', ''),
-(4, 4, 'Laptops', 'The latest Intel processor, a bigger hard drive, plenty of memory, and even more new features all fit inside just one liberating inch. The new Mac laptops have the performance, power, and connectivity of a desktop computer. Without the desk part.', 'Laptops', 'Apple laptops', 'Apple MacBook Air-Laptops', 'Powerful and chic Apple laptops'),
+(4, 4, 'Laptops', 'The latest Intel processor, a bigger hard drive, plenty of memory, and even more new features all fit inside just one liberating inch. The new Mac laptops have the performance, power, and connectivity of a desktop computer. Without the desk part.', 'laptops', 'Apple laptops', 'Apple MacBook Air-Laptops', 'Powerful and chic Apple laptops'),
 (2, 5, 'iPods', 'Adesso che puoi acquistare film dall\'iTunes Store e inserirli nel tuo iPod, il tuo mondo è un palcoscenico.', 'musica-ipods', '', '', ''),
 (3, 5, 'Accessori', 'Fantastici accessori per il tuo iPod', 'accessori-ipod', '', '', ''),
 (4, 5, 'Laptop', 'L\'ultimissimo processore Intel, hard drive più ampio, moltissima memoria, e ancora più funzioni tutte inserite in 2,54 centimetri. I nuovi laptop Mac offrono le prestazioni, la potenza e la connettività di un computer da tavolo. Senza bisogno del tavolo.', 'laptop', 'laptop Apple', 'laptot Apple MacBook Air', 'Laptop Apple potenti ed eleganti');
@@ -432,9 +432,9 @@ Cordialmente,');
 
 /* Block CMS module*/
 
-INSERT INTO `PREFIX_cms_block` (`id_block_cms`, `id_cms_category`, `name`, `location`, `position`) VALUES(1, 1, '', 0, 0);
-INSERT INTO `PREFIX_cms_block_page` (`id_block_cms_page`, `id_block_cms`, `id_cms`, `is_category`) VALUES(1, 1, 1, 0), (2, 1, 2, 0), (3, 1, 3, 0), (4, 1, 4, 0), (5, 1, 5, 0);
-INSERT INTO `PREFIX_cms_block_lang` (`id_block_cms`, `id_lang`, `name`) VALUES (1, 1, 'Information'),(1, 2, 'Informations'),(1, 3, 'Informaciónes'),(1, 4, 'Information'),(1, 5, 'Informazioni');
+INSERT INTO `PREFIX_cms_block` (`id_cms_block`, `id_cms_category`, `name`, `location`, `position`) VALUES(1, 1, '', 0, 0);
+INSERT INTO `PREFIX_cms_block_page` (`id_cms_block_page`, `id_cms_block`, `id_cms`, `is_category`) VALUES(1, 1, 1, 0), (2, 1, 2, 0), (3, 1, 3, 0), (4, 1, 4, 0), (5, 1, 5, 0);
+INSERT INTO `PREFIX_cms_block_lang` (`id_cms_block`, `id_lang`, `name`) VALUES (1, 1, 'Information'),(1, 2, 'Informations'),(1, 3, 'Informaciónes'),(1, 4, 'Information'),(1, 5, 'Informazioni');
 
 /* Currency/Country module */
 INSERT INTO `PREFIX_module_currency` (`id_module`, `id_currency`) VALUES (3, 1),(3, 2),(3, 3),(4, 1),(4, 2),(4, 3),(6, 1),(6, 2),(6, 3);

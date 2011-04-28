@@ -120,6 +120,7 @@ class OrderOpcControllerCore extends ParentOrderController
 									$blockUserInfo = new BlockUserInfo();
 								}
 								self::$smarty->assign('isVirtualCart', self::$cart->isVirtualCart());
+								$this->processAddressFormat();
 								$this->_assignAddress();
 								// Wrapping fees
 								$wrapping_fees = (float)(Configuration::get('PS_GIFT_WRAPPING_PRICE'));
@@ -182,7 +183,7 @@ class OrderOpcControllerCore extends ParentOrderController
 										'summary' => self::$cart->getSummaryDetails(),
 										'HOOK_TOP_PAYMENT' => Module::hookExec('paymentTop'),
 										'HOOK_PAYMENT' => self::_getPaymentMethods(),
-										'gift_price' => Tools::displayPrice(Tools::convertPrice(Product::getTaxCalculationMethod() == 0 ? $wrapping_fees : $wrapping_fees_tax_inc, new Currency((int)(self::$cookie->id_currency))))
+										'gift_price' => Tools::displayPrice(Tools::convertPrice(Product::getTaxCalculationMethod() == 1 ? $wrapping_fees : $wrapping_fees_tax_inc, new Currency((int)(self::$cookie->id_currency))))
 									));
 									die(Tools::jsonEncode($result));
 								}
@@ -252,6 +253,8 @@ class OrderOpcControllerCore extends ParentOrderController
 		// PAYMENT
 		$this->_assignPayment();
 		Tools::safePostVars();
+		
+		self::$smarty->assign('newsletter', (int)Module::getInstanceByName('blocknewsletter')->active);
 	}
 	
 	public function displayHeader()
@@ -263,7 +266,9 @@ class OrderOpcControllerCore extends ParentOrderController
 	public function displayContent()
 	{
 		parent::displayContent();
-		
+	
+		$this->processAddressFormat();
+	
 		self::$smarty->display(_PS_THEME_DIR_.'errors.tpl');
 		self::$smarty->display(_PS_THEME_DIR_.'order-opc.tpl');
 	}
@@ -313,22 +318,19 @@ class OrderOpcControllerCore extends ParentOrderController
 	
 	protected function _assignCarrier()
 	{
-		$carriers = Carrier::getCarriersForOrder(Country::getIdZone((int)Configuration::get('PS_COUNTRY_DEFAULT')));
-		if ($this->isLogged)
+		if (!$this->isLogged)
 		{
-			$address_delivery = new Address((int)(self::$cart->id_address_delivery));
-			if (!Address::isCountryActiveById((int)(self::$cart->id_address_delivery)))
-				unset($address_delivery);
-			elseif (!Validate::isLoadedObject($address_delivery) OR $address_delivery->deleted)
-				unset($address_delivery);
+			$carriers = Carrier::getCarriersForOrder(Country::getIdZone((int)Configuration::get('PS_COUNTRY_DEFAULT')));
+			self::$smarty->assign(array(
+				'checked' => $this->_setDefaultCarrierSelection($carriers),
+				'carriers' => $carriers,
+				'default_carrier' => (int)(Configuration::get('PS_CARRIER_DEFAULT')),
+				'HOOK_EXTRACARRIER' => NULL,
+				'HOOK_BEFORECARRIER' => Module::hookExec('beforeCarrier', array('carriers' => $carriers))
+			));
 		}
-		self::$smarty->assign(array(
-			'checked' => $this->_setDefaultCarrierSelection($carriers),
-			'carriers' => $carriers,
-			'default_carrier' => (int)(Configuration::get('PS_CARRIER_DEFAULT')),
-			'HOOK_EXTRACARRIER' => (isset($address_delivery) ? Module::hookExec('extraCarrier', array('address' => $address_delivery)) : NULL),
-			'HOOK_BEFORECARRIER' => Module::hookExec('beforeCarrier', array('carriers' => $carriers))
-		));
+		else
+			parent::_assignCarrier();
 	}
 	
 	protected function _assignPayment()
@@ -446,6 +448,15 @@ class OrderOpcControllerCore extends ParentOrderController
 		if (self::$cart->update())
 			return self::$cart->id_carrier;
 		return 0;
+	}
+
+	protected function processAddressFormat()
+	{
+		$selectedCountry = (int)(Configuration::get('PS_COUNTRY_DEFAULT'));
+		$inv_adr_fields = AddressFormat::getOrderedAddressFields($selectedCountry);
+		$dlv_adr_fields = AddressFormat::getOrderedAddressFields($selectedCountry);
+		self::$smarty->assign('inv_adr_fields', $inv_adr_fields);
+		self::$smarty->assign('dlv_adr_fields', $dlv_adr_fields);
 	}
 }
 

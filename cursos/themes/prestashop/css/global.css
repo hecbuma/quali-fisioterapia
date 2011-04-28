@@ -290,7 +290,8 @@ body.mceContentBody {
 .rte h1,
  .mceContentBody h1 {
 	font-size: 25px;
-	font-weight: bold
+	font-weight: bold;
+	background:inherit;
 }
 .rte h2,
  .mceContentBody h2 {
@@ -347,6 +348,7 @@ div.table_block {
 	margin: 0 auto 2em;
 	width: 541px
 }
+.std {font-size: 11px;}
 table.std {
 	border-spacing: 0;
 	border-collapse: collapse;

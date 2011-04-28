@@ -1,5 +1,5 @@
         <section class="cursos-secondary span-12">
-		<h2 class="span-3">Cursos</h2>
+		<h2 class="span-4">Cursos</h2>
 		<ul class="dropdown vertical">
 			<li class="menu">Agenda
 				<ul class="submenu">
@@ -14,7 +14,8 @@
                         <li><a href="javascript:history.go(-1)">Voltar</a></li>
 		</ul>   
 		<p>
-			Todos os nossos cursos encontram-se de acordo com a Legislação do COFFITO e do CNE.
+		    PÚBLICO ALVO: Fisioterapeutas e acadêmicos de fisioterapia a partir do 5º período<br/>
+                    Todos os nossos cursos encontram-se de acordo com a Legislação do COFFITO e do CNE.
 		</p>
 	</section>
                 
@@ -46,7 +47,7 @@
 {elseif isset($category)}
 
         <section class="cursos-info span-12 last">
-		<h3>Todos os Cursos</h3>
+		<h3>Cursos Oferecidos / Conteúdo Programático</h3>
 		<ul>
 			{foreach from=$cms_pages item=cmspages}
 		    	<li>

@@ -60,7 +60,7 @@ class AdminModules extends AdminTab
 		 'i18n_localization' => $this->l('I18n & Localization'), 'merchandizing' => $this->l('Merchandizing'), 'migration_tools' => $this->l('Migration Tools'),
 		 'payments_gateways' => $this->l('Payments & Gateways'), 'payment_security' => $this->l('Payment Security'), 'pricing_promotion' => $this->l('Pricing & Promotion'),
 		 'quick_bulk_update' => $this->l('Quick / Bulk update'), 'search_filter' => $this->l('Search & Filter'), 'seo' => $this->l('SEO'), 'shipping_logistics' => $this->l('Shipping & Logistics'),
-		 'slideshows' => $this->l('Slideshows'), 'smart_shopping' => $this->l('Smart Shopping'), 'social_networks' => $this->l('Social Networks'), 'others'=> $this->l('Other Modules'));
+		 'slideshows' => $this->l('Slideshows'), 'smart_shopping' => $this->l('Smart Shopping'), 'market_place' => $this->l('Market Place'), 'social_networks' => $this->l('Social Networks'), 'others'=> $this->l('Other Modules'));
 		 
 		 $xmlModules = @simplexml_load_file($this->_moduleCacheFile);
 
@@ -80,20 +80,37 @@ class AdminModules extends AdminTab
 	public function postProcess()
 	{
 		global $currentIndex, $cookie;
+
+		$id_employee = (int)($cookie->id_employee);
+		$filter_conf = Configuration::getMultiple(array(
+												'PS_SHOW_TYPE_MODULES_'.$id_employee,
+												'PS_SHOW_COUNTRY_MODULES_'.$id_employee,
+												'PS_SHOW_INSTALLED_MODULES_'.$id_employee,
+												'PS_SHOW_ENABLED_MODULES_'.$id_employee
+												));
+		//reset filtre
+		if (Tools::isSubmit('desactive') && $filter_conf['PS_SHOW_ENABLED_MODULES_'.$id_employee] != 'enabledDisabled')
+			$this->setFilterModules($filter_conf['PS_SHOW_TYPE_MODULES_'.$id_employee], $filter_conf['PS_SHOW_COUNTRY_MODULES_'.$id_employee], $filter_conf['PS_SHOW_INSTALLED_MODULES_'.$id_employee], 'disabled');
 			
+		if (Tools::isSubmit('active') && $filter_conf['PS_SHOW_ENABLED_MODULES_'.$id_employee] != 'enabledDisabled')
+			$this->setFilterModules($filter_conf['PS_SHOW_TYPE_MODULES_'.$id_employee], $filter_conf['PS_SHOW_COUNTRY_MODULES_'.$id_employee], $filter_conf['PS_SHOW_INSTALLED_MODULES_'.$id_employee], 'enabled');
+			
+		if (Tools::isSubmit('uninstall') && $filter_conf['PS_SHOW_INSTALLED_MODULES_'.$id_employee] != 'installedUninstalled')
+			$this->setFilterModules($filter_conf['PS_SHOW_TYPE_MODULES_'.$id_employee], $filter_conf['PS_SHOW_COUNTRY_MODULES_'.$id_employee], 'unistalled', $filter_conf['PS_SHOW_ENABLED_MODULES_'.$id_employee]);
+			
+		if (Tools::isSubmit('install') && $filter_conf['PS_SHOW_INSTALLED_MODULES_'.$id_employee] != 'installedUninstalled')
+			$this->setFilterModules($filter_conf['PS_SHOW_TYPE_MODULES_'.$id_employee], $filter_conf['PS_SHOW_COUNTRY_MODULES_'.$id_employee], 'installed', $filter_conf['PS_SHOW_ENABLED_MODULES_'.$id_employee]);
+		
+		
 		if (Tools::isSubmit('filterModules'))
 		{
-			Configuration::updateValue('PS_SHOW_TYPE_MODULES_'.(int)($cookie->id_employee), Tools::getValue('module_type'));
-			Configuration::updateValue('PS_SHOW_COUNTRY_MODULES_'.(int)($cookie->id_employee), Tools::getValue('country_module_value'));
-			Configuration::updateValue('PS_SHOW_INSTALLED_MODULES_'.(int)($cookie->id_employee), Tools::getValue('module_install'));
-			Configuration::updateValue('PS_SHOW_ENABLED_MODULES_'.(int)($cookie->id_employee), Tools::getValue('module_status'));
+			$this->setFilterModules(Tools::getValue('module_type'), Tools::getValue('country_module_value'), Tools::getValue('module_install'), Tools::getValue('module_status'));
+			Tools::redirectAdmin($currentIndex.'&token='.$this->token);
 		}
 		elseif (Tools::isSubmit('resetFilterModules'))
 		{
-			Configuration::updateValue('PS_SHOW_TYPE_MODULES_'.(int)($cookie->id_employee), 'allModules');
-			Configuration::updateValue('PS_SHOW_COUNTRY_MODULES_'.(int)($cookie->id_employee), 0);
-			Configuration::updateValue('PS_SHOW_INSTALLED_MODULES_'.(int)($cookie->id_employee), 'installedUninstalled');
-			Configuration::updateValue('PS_SHOW_ENABLED_MODULES_'.(int)($cookie->id_employee), 'enabledDisabled');
+			$this->resetFilterModules();
+			Tools::redirectAdmin($currentIndex.'&token='.$this->token);
 		}
 		if (Tools::isSubmit('active'))
 		{
@@ -308,6 +325,8 @@ class AdminModules extends AdminTab
 		global $currentIndex;
 
 		echo '<script type="text/javascript" src="'._PS_JS_DIR_.'jquery/jquery.autocomplete.js"></script>
+			<script type="text/javascript" src="'._PS_JS_DIR_.'jquery/jquery.fancybox-1.3.4.js"></script>
+
 		<script type="text/javascript">
 			function getPrestaStore(){if (getE("prestastore").style.display!=\'block\')return;$.post("'.dirname($currentIndex).'/ajax.php",{page:"prestastore"},function(a){getE("prestastore-content").innerHTML=a;})}
 			function truncate_author(author)
@@ -434,7 +453,7 @@ class AdminModules extends AdminTab
 
 			$moduleAuthor = $module->author;
 			if (!empty($moduleAuthor)&& ($moduleAuthor != ""))
-				$modulesAuthors[$moduleAuthor] = true;
+				$modulesAuthors[(string)$moduleAuthor] = true;
 		}
 
 		$serialModules = urlencode($serialModules);
@@ -512,25 +531,28 @@ class AdminModules extends AdminTab
 			}		
 			
 			if ($showCountryModules)		
-				if (isset($module->limited_countries) AND ((is_array($module->limited_countries) AND !in_array(strtolower($isoCountryDefault), $module->limited_countries)) OR (!is_array($module->limited_countries) AND strtolower($isoCountryDefault) != strval($module->limited_countries))))
+				if (isset($module->limited_countries) AND ((is_array($module->limited_countries) AND sizeof($module->limited_countries) AND !in_array(strtolower($isoCountryDefault), $module->limited_countries)) OR (!is_array($module->limited_countries) AND strtolower($isoCountryDefault) != strval($module->limited_countries))))
 					unset($modules[$key]);
 			
 			if (!empty($filterName))
 				if (stristr($module->name, $filterName) === false AND stristr($module->displayName, $filterName) === false AND stristr($module->description, $filterName) === false)
 					unset($modules[$key]);
-
+		}
+		
+		foreach($modules as $module)
 			$autocompleteList .= Tools::jsonEncode(array(
 				'displayName' => (string)$module->displayName,
 				'desc' => (string)$module->description,
 				'name' => (string)$module->name,
 				'author' => (string)$module->author
 			)).', ';
-		}
+		
 		$autocompleteList = rtrim($autocompleteList, ' ,').'];';
+		// Display CSS Fancy Box
+		echo '<link href="'._PS_CSS_DIR_.'jquery.fancybox-1.3.4.css" rel="stylesheet" type="text/css" media="screen" />';
 		echo '<script type="text/javascript">'.$autocompleteList.'</script>';
 		$this->displayJavascript();
 		
-
 		echo '
 		<span onclick="$(\'#module_install\').slideToggle()" style="cursor:pointer"><img src="../img/admin/add.gif" alt="'.$this->l('Add a new module').'" class="middle" />
 			'.$this->l('Add a module from my computer').'
@@ -657,12 +679,11 @@ class AdminModules extends AdminTab
 				$goto = 'others';
 		else
 			$goto = false;
+			
 		echo '
   		<script src="'.__PS_BASE_URI__.'js/jquery/jquery.scrollTo-1.4.2-min.js"></script>
 		<script>
 		 $(document).ready(function() {
-		 
-		 '.(!$goto ? '': '$(\'#'.$goto.'_content\').slideToggle();').'
 		 
 		 $(\'.header_module_toggle, .module_toggle_all\').unbind(\'click\').click(function(){
 		 	var id = $(this).attr(\'id\');
@@ -695,6 +716,8 @@ class AdminModules extends AdminTab
 		 	}
 		 	return false;
 		 });
+		'.(!$goto ? '': '$(\'#'.$goto.'_content\').slideToggle( function (){
+		$(\'#'.$goto.'_img\').attr(\'src\', \'../img/admin/less.png\');
 		'.(!$goto ? '' : '$.scrollTo($("#modgo_'.Tools::getValue('module_name').'"), 300 , 
 		{onAfter:function(){
 			$("#modgo_'.Tools::getValue('module_name').'").fadeTo(100, 0, function (){
@@ -707,6 +730,8 @@ class AdminModules extends AdminTab
 						)}
 					)}
 				});').'
+		});').'
+		
 			});
 		 </script>';
 		if (!empty($orderModule))
@@ -754,13 +779,14 @@ class AdminModules extends AdminTab
 					echo $img;
 					if ($module->id)
 						'</a>';
+					$href = $currentIndex.'&uninstall='.urlencode($module->name).'&token='.$this->token.'&tab_module='.$module->tab.'&module_name='.$module->name;
 					echo '
 						</td>
 						<td class="center" width="120" rowspan="2">'.((!$module->id)
 						? '<input type="button" class="button small" name="Install" value="'.$this->l('Install').'"
 						onclick="javascript:document.location.href=\''.$currentIndex.'&install='.urlencode($module->name).'&token='.$this->token.'&tab_module='.$module->tab.'&module_name='.$module->name.'\'">'
 						: '<input type="button" class="button small" name="Uninstall" value="'.$this->l('Uninstall').'"
-						onclick="'.(empty($module->confirmUninstall) ? '' : 'if(confirm(\''.addslashes($module->confirmUninstall).'\')) ').'document.location.href=\''.$currentIndex.'&uninstall='.urlencode($module->name).'&token='.$this->token.'&tab_module='.$module->tab.'&module_name='.$module->name.'\'">').'</td>
+						onclick="'.((!method_exists($module, 'onclickOption')) ? ((empty($module->confirmUninstall)) ? '' : 'if(confirm(\''.addslashes($module->confirmUninstall).'\')) ').'document.location.href=\''.$href.'\'' : $module->onclickOption('uninstall', $href)).'">').'</td>
 						
 					</tr>
 					<tr'.($irow++ % 2 ? ' class="alt_row"' : '').'>
@@ -815,17 +841,19 @@ class AdminModules extends AdminTab
 	{
 		global $currentIndex;
 		$return = '';
+		$href = $currentIndex.'&token='.$this->token.'&module_name='.
+			urlencode($module->name).'&tab_module='.$module->tab;
 		
 		if ((int)($module->id))
-			$return .= '<a class="action_module" href="'.$currentIndex.'&token='.$this->token.'&module_name='.urlencode($module->name).'&'.($module->active ? 'desactive' : 'active').'&tab_module='.$module->tab.'&module_name='.urlencode($module->name).'">'.($module->active ? $this->l('Disable') : $this->l('Enable')).'</a>&nbsp;&nbsp;';
+			$return .= '<a class="action_module" '.($module->active && method_exists($module, 'onclickOption')? 'onclick="'.$module->onclickOption('desactive', $href).'"' : '').' href="'.$currentIndex.'&token='.$this->token.'&module_name='.urlencode($module->name).'&'.($module->active ? 'desactive' : 'active').'&tab_module='.$module->tab.'&module_name='.urlencode($module->name).'">'.($module->active ? $this->l('Disable') : $this->l('Enable')).'</a>&nbsp;&nbsp;';
 		
 		if ((int)($module->id) AND $module->active)
-			$return .= '<a class="action_module" href="'.$currentIndex.'&token='.$this->token.'&module_name='.urlencode($module->name).'&reset&tab_module='.$module->tab.'&module_name='.urlencode($module->name).'">'.$this->l('Reset').'</a>&nbsp;&nbsp;';
+			$return .= '<a class="action_module" '.(method_exists($module, 'onclickOption')? 'onclick="'.$module->onclickOption('reset', $href).'"' : '').' href="'.$currentIndex.'&token='.$this->token.'&module_name='.urlencode($module->name).'&reset&tab_module='.$module->tab.'&module_name='.urlencode($module->name).'">'.$this->l('Reset').'</a>&nbsp;&nbsp;';
 		
 		if ((int)($module->id) AND (method_exists($module, 'getContent') OR (isset($module->is_configurable) AND (int)$module->is_configurable)))
-			$return .= '<a class="action_module" href="'.$currentIndex.'&configure='.urlencode($module->name).'&token='.$this->token.'&tab_module='.$module->tab.'&module_name='.urlencode($module->name).'">'.$this->l('Configure').'</a>&nbsp;&nbsp;';
+			$return .= '<a class="action_module" '.(method_exists($module, 'onclickOption')? 'onclick="'.$module->onclickOption('configure', $href).'"' : '').' href="'.$currentIndex.'&configure='.urlencode($module->name).'&token='.$this->token.'&tab_module='.$module->tab.'&module_name='.urlencode($module->name).'">'.$this->l('Configure').'</a>&nbsp;&nbsp;';
 			
-		$return .= '<a class="action_module" onclick="return confirm(\''.$this->l('This action will permanently remove the module from the server. Are you sure you want to do this ?').'\');" href="'.$currentIndex.'&deleteModule='.urlencode($module->name).'&token='.$this->token.'&tab_module='.$module->tab.'&module_name='.urlencode($module->name).'">'.$this->l('Delete').'</a>&nbsp;&nbsp;';
+		$return .= '<a class="action_module" '.(method_exists($module, 'onclickOption')? 'onclick="'.$module->onclickOption('delete', $href).'"' : '').' onclick="return confirm(\''.$this->l('This action will permanently remove the module from the server. Are you sure you want to do this ?').'\');" href="'.$currentIndex.'&deleteModule='.urlencode($module->name).'&token='.$this->token.'&tab_module='.$module->tab.'&module_name='.urlencode($module->name).'">'.$this->l('Delete').'</a>&nbsp;&nbsp;';
 		
 		return $return;
 	}
@@ -841,6 +869,26 @@ class AdminModules extends AdminTab
 	public function refresh()
 	{
 		return file_put_contents($this->_moduleCacheFile, Tools::file_get_contents('http://www.prestashop.com/xml/modules_list.xml'));
+	}
+	
+	private function setFilterModules($module_type, $country_module_value, $module_install, $module_status)
+	{
+		global $cookie;
+		
+		Configuration::updateValue('PS_SHOW_TYPE_MODULES_'.(int)($cookie->id_employee), $module_type);
+		Configuration::updateValue('PS_SHOW_COUNTRY_MODULES_'.(int)($cookie->id_employee), $country_module_value);
+		Configuration::updateValue('PS_SHOW_INSTALLED_MODULES_'.(int)($cookie->id_employee), $module_install);
+		Configuration::updateValue('PS_SHOW_ENABLED_MODULES_'.(int)($cookie->id_employee), $module_status);
+	}
+	
+	private function resetFilterModules()
+	{
+		global $cookie;
+		
+		Configuration::updateValue('PS_SHOW_TYPE_MODULES_'.(int)($cookie->id_employee), 'allModules');
+		Configuration::updateValue('PS_SHOW_COUNTRY_MODULES_'.(int)($cookie->id_employee), 0);
+		Configuration::updateValue('PS_SHOW_INSTALLED_MODULES_'.(int)($cookie->id_employee), 'installedUninstalled');
+		Configuration::updateValue('PS_SHOW_ENABLED_MODULES_'.(int)($cookie->id_employee), 'enabledDisabled');
 	}
 	
 }

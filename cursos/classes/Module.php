@@ -71,6 +71,9 @@ abstract class ModuleCore
 
 	static public $_db;
 
+	/** @var array to store the limited country */
+	public $limited_countries = array();
+
 	/**
 	 * Constructor
 	 *
@@ -84,7 +87,12 @@ abstract class ModuleCore
 	protected static $_generateConfigXmlMode = false;
 	
 	protected static $l_cache = array();
-	
+
+	/**
+	 * @var array used by AdminTab to determine which lang file to use (admin.php or module lang file)
+	 */
+	public static $classInModule	= array();
+
 	public function __construct($name = NULL)
 	{
 		global $cookie;
@@ -158,6 +166,27 @@ abstract class ModuleCore
 	}
 
 	/**
+	 * This function enable module $name. If an $name is an array, 
+	 * this will enable all of them
+	 * 
+	 * @param array|string $name 
+	 * @return true if succeed
+	 * @since 1.4.1
+	 */
+	public static function enableByName($name) 
+	{
+		if (!is_array($name))
+			$name = array($name);
+
+		foreach ($name as $k=>$v)
+			$name[$k] = '"'.pSQL($v).'"';
+
+		return Db::getInstance()->Execute('
+		UPDATE `'._DB_PREFIX_.'module`
+		SET `active`= 1
+		WHERE `name` IN ('.implode(',',$name).')');
+	}
+	/**
 	 * Called when module is set to active
 	 */
 	public function enable()
@@ -169,14 +198,33 @@ abstract class ModuleCore
 	}
 	
 	/**
+	 * This function disable module $name. If an $name is an array, 
+	 * this will disable all of them
+	 * 
+	 * @param array|string $name 
+	 * @return true if succeed
+	 * @since 1.4.1
+	 */
+	public static function disableByName($name) 
+	{
+		if (!is_array($name))
+			$name = array($name);
+
+		foreach ($name as $k=>$v)
+			$name[$k] = '"'.pSQL($v).'"';
+
+		return Db::getInstance()->Execute('
+		UPDATE `'._DB_PREFIX_.'module`
+		SET `active`= 0
+		WHERE `name` IN ('.implode(',',$name).')');
+	}
+	
+	/**
 	 * Called when module is set to deactive
 	 */
 	public function disable() 
 	{
-		return Db::getInstance()->Execute('
-		UPDATE `'._DB_PREFIX_.'module`
-		SET `active`= 0
-		WHERE `name` = \''.pSQL($this->name).'\'');
+		return Module::disableByName($this->name);
 	}
 
 	/**
@@ -317,6 +365,42 @@ abstract class ModuleCore
 		return $this->registerExceptions($id_hook, $excepts);
 	}
 
+
+	/**
+	 * This function is used to determine the module name 
+	 * of an AdminTab which belongs to a module, in order to keep translation
+	 * related to a module in its directory (instead of $_LANGADM)
+	 * 
+	 * @param mixed $currentClass the 
+	 * @return boolean|string if the class belongs to a module, will return the module name. Otherwise, return false.
+	 */
+	public static function getModuleNameFromClass($currentClass)
+	{
+		// Module can now define AdminTab keeping the module translations method,
+		// i.e. in modules/[module name]/[iso_code].php
+		if (!isset(self::$classInModule[$currentClass]))
+		{
+			global $_MODULES;
+			$_MODULE = array();
+			$reflectionClass = new ReflectionClass($currentClass);
+			$filePath = realpath($reflectionClass->getFileName());
+			$realpathModuleDir = realpath(_PS_MODULE_DIR_);
+			if (substr(realpath($filePath), 0, strlen($realpathModuleDir)) == $realpathModuleDir)
+			{
+				self::$classInModule[$currentClass] = substr(dirname($filePath), strlen($realpathModuleDir)+1);
+
+				$id_lang = (!isset($cookie) OR !is_object($cookie)) ? (int)(Configuration::get('PS_LANG_DEFAULT')) : (int)($cookie->id_lang);
+				$file = _PS_MODULE_DIR_.self::$classInModule[$currentClass].'/'.Language::getIsoById($id_lang).'.php';
+				if (Tools::file_exists_cache($file) AND include_once($file))
+					$_MODULES = !empty($_MODULES) ? array_merge($_MODULES, $_MODULE) : $_MODULE;
+			}
+			else 
+				self::$classInModule[$currentClass] = false;
+		}
+		// return name of the module, or false
+		return self::$classInModule[$currentClass];
+	}
+
 	/**
 	  * Return an instance of the specified module
 	  *
@@ -437,7 +521,7 @@ abstract class ModuleCore
 		$modules = scandir(_PS_MODULE_DIR_);
 		foreach ($modules AS $name)
 		{
-			if (Tools::file_exists_cache($moduleFile = _PS_MODULE_DIR_.'/'.$name.'/'.$name.'.php'))
+			if (Tools::file_exists_cache($moduleFile = _PS_MODULE_DIR_.$name.'/'.$name.'.php'))
 			{
 				if (!Validate::isModuleName($name))
 					die(Tools::displayError().' (Module '.$name.')');
@@ -445,6 +529,34 @@ abstract class ModuleCore
 			}
 		}
 		return $moduleList;
+	}
+
+	/**
+		* Return non native module
+		*
+		* @param int $position Take only positionnables modules
+		* @return array Modules
+		*/
+	public static function getNonNativeModuleList()
+	{
+		$db = Db::getInstance();
+		$modulesDirOnDisk = Module::getModulesDirOnDisk();
+
+		$module_list_xml = _PS_ROOT_DIR_.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'modules_list.xml';
+		$nativeModules = simplexml_load_file($module_list_xml);
+		$nativeModules = $nativeModules->modules;
+		foreach ($nativeModules as $nativeModulesType)
+			if (in_array($nativeModulesType['type'],array('native','partner')))
+			{
+				$arrNativeModules[] = '""';
+				foreach ($nativeModulesType->module as $module)
+					$arrNativeModules[] = '"'.pSQL($module['name']).'"';
+			}
+
+		return $db->ExecuteS('
+			SELECT *
+			FROM `'._DB_PREFIX_.'module` m
+			WHERE name NOT IN ('.implode(',',$arrNativeModules).') ');
 	}
 
 	/**
@@ -496,6 +608,7 @@ abstract class ModuleCore
 			AND m.`active` = 1
 			ORDER BY hm.`position`', false);
 			self::$_hookModulesCache = array();
+	
 			if ($result)
 				while ($row = $db->nextRow())
 				{
@@ -508,6 +621,7 @@ abstract class ModuleCore
 
 		if (!isset(self::$_hookModulesCache[$hook_name]))
 			return;
+
 		$altern = 0;
 		$output = '';
 		foreach (self::$_hookModulesCache[$hook_name] AS $array)
@@ -525,8 +639,9 @@ abstract class ModuleCore
 			if (is_callable(array($moduleInstance, 'hook'.$hook_name)))
 			{
 				$hookArgs['altern'] = ++$altern;
+
 				$display = call_user_func(array($moduleInstance, 'hook'.$hook_name), $hookArgs);
-				if ($array['live_edit'] && $cookie->live_edit && $ad = Tools::getValue('ad'))
+				if ($array['live_edit'] && ((Tools::isSubmit('live_edit') AND $ad = Tools::getValue('ad') AND (Tools::getValue('liveToken') == sha1(Tools::getValue('ad')._COOKIE_KEY_)))))
 				{
 					$live_edit = true;
 					$output .= '<script type="text/javascript"> modules_list.push(\''.$moduleInstance->name.'\');</script>
@@ -545,7 +660,7 @@ abstract class ModuleCore
 			}
 		}
 		return ($live_edit ? '<script type="text/javascript">hooks_list.push(\''.$hook_name.'\'); </script><!--<div id="add_'.$hook_name.'" class="add_module_live_edit">
-				<a class="exclusive" href="#">Add a module</a></div>--><div id="'.$hook_name.'" class="dndHook">' : '').$output.($live_edit ? '</div>' : '');
+				<a class="exclusive" href="#">Add a module</a></div>--><div id="'.$hook_name.'" class="dndHook" style="min-height:50px">' : '').$output.($live_edit ? '</div>' : '');
 	}
 
 	public static function hookExecPayment()
@@ -770,7 +885,7 @@ abstract class ModuleCore
 
 	public static function isInstalled($moduleName)
 	{
-		Db::getInstance()->Execute('SELECT `id_module` FROM `'._DB_PREFIX_.'module` WHERE `name` = \''.pSQL($moduleName).'\'');
+		Db::getInstance()->ExecuteS('SELECT `id_module` FROM `'._DB_PREFIX_.'module` WHERE `name` = \''.pSQL($moduleName).'\'');
 		return (bool)Db::getInstance()->NumRows();
 	}
 
@@ -871,6 +986,15 @@ abstract class ModuleCore
 </module>';
 		if (is_writable(_PS_MODULE_DIR_.$this->name.'/'))
 			file_put_contents(_PS_MODULE_DIR_.$this->name.'/config.xml', utf8_encode($xml));
+	}
+	
+	/**
+	 * @param string $hook_name
+	 * @return bool if module can be transplanted on hook
+	 */
+	public function isHookableOn($hook_name)
+	{
+		return is_callable(array($this, 'hook'.ucfirst($hook_name)));
 	}
 }
 

@@ -62,7 +62,6 @@ class FrontControllerCore
 	{
 		$this->init();
 		$this->preProcess();
-		$this->setMedia();
 		$this->displayHeader();
 		$this->process();
 		$this->displayContent();
@@ -72,15 +71,15 @@ class FrontControllerCore
 	public function init()
 	{
 		global $cookie, $smarty, $cart, $iso, $defaultCountry, $protocol_link, $protocol_content, $link, $css_files, $js_files;
-		
+
 		$css_files = array();
 		$js_files = array();
-		
+
 		if (self::$initialized)
 			return;
 		self::$initialized = true;
 
-		if ($this->ssl AND !(isset($_SERVER['HTTPS']) AND strtolower($_SERVER['HTTPS']) == 'on') AND Configuration::get('PS_SSL_ENABLED'))
+		if ($this->ssl AND !(empty($_SERVER['HTTPS']) OR strtolower($_SERVER['HTTPS']) != 'off') AND Configuration::get('PS_SSL_ENABLED'))
 		{
 			header('HTTP/1.1 301 Moved Permanently');
 			header('Location: '.Tools::getShopDomainSsl(true).$_SERVER['REQUEST_URI']);
@@ -136,7 +135,7 @@ class FrontControllerCore
 			if ($cart->OrderExists())
 				unset($cookie->id_cart, $cart);
 			/* Delete product of cart, if user can't make an order from his country */
-			elseif (intval(Configuration::get('PS_GEOLOCATION_ENABLED')) AND !in_array(strtoupper($cookie->iso_code_country), explode(';', Configuration::get('PS_ALLOWED_COUNTRIES'))) AND $cart->nbProducts())
+			elseif (intval(Configuration::get('PS_GEOLOCATION_ENABLED')) AND !in_array(strtoupper($cookie->iso_code_country), explode(';', Configuration::get('PS_ALLOWED_COUNTRIES'))) AND $cart->nbProducts() AND intval(Configuration::get('PS_GEOLOCATION_NA_BEHAVIOR')) != -1)
 				unset($cookie->id_cart, $cart);
 			elseif ($cookie->id_customer != $cart->id_customer OR $cookie->id_lang != $cart->id_lang OR $cookie->id_currency != $cart->id_currency)
 			{
@@ -204,6 +203,15 @@ class FrontControllerCore
 
 		Product::initPricesComputation();
 
+		$display_tax_label = $defaultCountry->display_tax_label;
+		if ($cart->{Configuration::get('PS_TAX_ADDRESS_TYPE')})
+		{
+			$infos = Address::getCountryAndState((int)($cart->{Configuration::get('PS_TAX_ADDRESS_TYPE')}));
+			$country = new Country((int)$infos['id_country']);
+			if (Validate::isLoadedObject($country))
+				$display_tax_label = $country->display_tax_label;
+		}
+
 		$smarty->assign(array(
 			'link' => $link,
 			'cart' => $cart,
@@ -226,6 +234,7 @@ class FrontControllerCore
 			'shop_name' => Configuration::get('PS_SHOP_NAME'),
 			'roundMode' => (int)Configuration::get('PS_PRICE_ROUND_MODE'),
 			'use_taxes' => (int)Configuration::get('PS_TAX'),
+			'display_tax_label' => (bool)$display_tax_label,
 			'vat_management' => (int)Configuration::get('VATNUMBER_MANAGEMENT'),
 			'opc' => (bool)Configuration::get('PS_ORDER_PROCESS_TYPE'),
 			'PS_CATALOG_MODE' => (bool)Configuration::get('PS_CATALOG_MODE')
@@ -261,6 +270,12 @@ class FrontControllerCore
 			else
 				$smarty->assign($assignKey, $assignValue);
 
+		// setting properties from global var
+		self::$cookie = $cookie;
+		self::$cart = $cart;
+		self::$smarty = $smarty;
+		self::$link = $link;
+
 		if ($this->maintenance)
 			$this->displayMaintenancePage();
 		if ($this->restrictedCountry)
@@ -268,31 +283,22 @@ class FrontControllerCore
 
 		//live edit
 		if (Tools::isSubmit('live_edit') AND $ad = Tools::getValue('ad') AND (Tools::getValue('liveToken') == sha1(Tools::getValue('ad')._COOKIE_KEY_)))
-			if (is_dir($_SERVER['DOCUMENT_ROOT'].__PS_BASE_URI__.$ad))
-				$cookie->live_edit = true;
-			else
+			if (!is_dir(_PS_ROOT_DIR_.DIRECTORY_SEPARATOR.$ad))
 				die(Tools::displayError());
-		else
-			unset($cookie->live_edit);
-		
-		self::$cookie = $cookie;
-		self::$cart = $cart;
-		self::$smarty = $smarty;
-		self::$link = $link;
+
 
 		$this->iso = $iso;
-		self::setMedia();
+		$this->setMedia();
 	}
 
 	/* Display a maintenance page if shop is closed */
 	protected function displayMaintenancePage()
 	{
-		global $smarty;
-		
+
 		if (!in_array(Tools::getRemoteAddr(), explode(',', Configuration::get('PS_MAINTENANCE_IP'))))
 		{
 			header('HTTP/1.1 503 temporarily overloaded');
-			$smarty->display(_PS_THEME_DIR_.'maintenance.tpl');
+			self::$smarty->display(_PS_THEME_DIR_.'maintenance.tpl');
 			exit;
 		}
 	}
@@ -301,7 +307,7 @@ class FrontControllerCore
 	protected function displayRestrictedCountryPage()
 	{
 		global $smarty;
-		
+
 		header('HTTP/1.1 503 temporarily overloaded');
 		$smarty->display(_PS_THEME_DIR_.'restricted-country.tpl');
 		exit;
@@ -310,7 +316,7 @@ class FrontControllerCore
 	protected function canonicalRedirection()
 	{
 		global $link, $cookie;
-		
+
 		if (Configuration::get('PS_CANONICAL_REDIRECT'))
 		{
 			// Automatically redirect to the canonical URL if needed
@@ -356,7 +362,7 @@ class FrontControllerCore
 						if (Configuration::get('PS_GEOLOCATION_BEHAVIOR') == _PS_GEOLOCATION_NO_CATALOG_)
 							$this->restrictedCountry = true;
 						elseif (Configuration::get('PS_GEOLOCATION_BEHAVIOR') == _PS_GEOLOCATION_NO_ORDER_)
-							self::$smarty->assign(array(
+							$smarty->assign(array(
 								'restricted_country_mode' => true,
 								'geolocation_country' => $record->country_name
 							));
@@ -378,7 +384,7 @@ class FrontControllerCore
 				elseif (Configuration::get('PS_GEOLOCATION_NA_BEHAVIOR') == _PS_GEOLOCATION_NO_CATALOG_)
 					$this->restrictedCountry = true;
 				elseif (Configuration::get('PS_GEOLOCATION_NA_BEHAVIOR') == _PS_GEOLOCATION_NO_ORDER_)
-					self::$smarty->assign(array(
+					$smarty->assign(array(
 						'restricted_country_mode' => true,
 						'geolocation_country' => 'Undefined'
 					));
@@ -396,13 +402,13 @@ class FrontControllerCore
 	public function setMedia()
 	{
 		global $cookie;
-		
+
 		Tools::addCSS(_THEME_CSS_DIR_.'global.css', 'all');
 		Tools::addJS(array(_PS_JS_DIR_.'tools.js', _PS_JS_DIR_.'jquery/jquery-1.4.4.min.js', _PS_JS_DIR_.'jquery/jquery.easing.1.3.js'));
-		if ($cookie->live_edit)
+		if (Tools::isSubmit('live_edit') AND $ad = Tools::getValue('ad') AND (Tools::getValue('liveToken') == sha1(Tools::getValue('ad')._COOKIE_KEY_)))
 		{
 			Tools::addJS(array(
-							_PS_JS_DIR_.'jquery/jquery-ui-1.8.10.custom.min.js', 
+							_PS_JS_DIR_.'jquery/jquery-ui-1.8.10.custom.min.js',
 							_PS_JS_DIR_.'jquery/jquery.fancybox-1.3.4.js',
 							_PS_JS_DIR_.'hookLiveEdit.js')
 							);
@@ -433,6 +439,7 @@ class FrontControllerCore
 		/* Hooks are volontary out the initialize array (need those variables already assigned) */
 		self::$smarty->assign(array(
 			'time' => time(),
+			'img_update_time' => Configuration::get('PS_IMG_UPDATE_TIME'),
 			'static_token' => Tools::getToken(false),
 			'token' => Tools::getToken(),
 			'logo_image_width' => Configuration::get('SHOP_LOGO_WIDTH'),
@@ -456,7 +463,7 @@ class FrontControllerCore
 			if (Configuration::get('PS_JS_THEME_CACHE'))
 				Tools::cccJs();
 		}
-		
+
 		self::$smarty->assign('css_files', $css_files);
 		self::$smarty->assign('js_files', array_unique($js_files));
 		self::$smarty->display(_PS_THEME_DIR_.'header.tpl');
@@ -474,7 +481,7 @@ class FrontControllerCore
 			'content_only' => (int)(Tools::getValue('content_only'))));
 		self::$smarty->display(_PS_THEME_DIR_.'footer.tpl');
 		//live edit
-		if ($cookie->live_edit AND $ad = Tools::getValue('ad'))
+		if (Tools::isSubmit('live_edit') AND $ad = Tools::getValue('ad') AND (Tools::getValue('liveToken') == sha1(Tools::getValue('ad')._COOKIE_KEY_)))
 		{
 			self::$smarty->assign(array('ad' => $ad, 'live_edit' => true));
 			self::$smarty->display(_PS_ALL_THEMES_DIR_.'live_edit.tpl');
@@ -549,7 +556,7 @@ class FrontControllerCore
 
 	public static function getCurrentCustomerGroups()
 	{
-		if (!self::$cookie->id_customer)
+		if (!isset(self::$cookie) || !self::$cookie->id_customer)
 			return array();
 		if (!is_array(self::$currentCustomerGroups))
 		{

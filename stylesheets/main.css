@@ -1,7 +1,8 @@
 body {
   
   background-color: #e8e8e9 ;
-  font-family: 'Arimo', arial, serif;
+  /*font-family: 'Arimo', arial, serif;*/
+  font-family:"Helvetica","Lucida Grande","Lucida Sans Unicode","Sans","sans-serif";
   color:white;
 }
 body.blue-bkg {
@@ -48,7 +49,7 @@ background-image: -moz-linear-gradient(
 }
 
 header {
-margin-bottom:50px;
+margin-bottom:35px;
 
 }
 
@@ -64,8 +65,7 @@ header section#logo {
 }
 
 header nav {
-    font-family: 'Arimo', arial, serif;
-    height: 53px;
+    height: 50px;
 	background-color: #142671;
 	-webkit-border-bottom-left-radius: 127px;
 	-moz-border-radius-bottomleft: 127px;
@@ -104,13 +104,10 @@ header nav  ul  li{
    
 }
 header nav ul li  {
-	font-style: italic;
-    font-family: 'Arimo', arial, serif;
 	color: white;
     display: block;
-    padding: 11px 21px;
+    padding: 22px 21px 14px;
     text-decoration: none;
-	line-height:30px;
 }
 header nav ul li  a {
   text-decoration: none;
@@ -201,7 +198,6 @@ footer {
 }
 footer img {
 	float:left;
-	margin-right:20px;
 	margin-left:30px;
 }
 footer section:first-child {
@@ -217,7 +213,7 @@ footer section:first-child  p {
 }
 footer section p {
     display: block;
-    margin-right: 17px;
+    margin-right: 15px;
     margin-top: 10px;
 }
 footer section p span {
@@ -320,12 +316,12 @@ section.cursos h2 {
     text-align: right;
 	color: rgba(255, 255, 255, 0.8);
 	
-	-webkit-border-top-right-radius: 22px;
-	-webkit-border-bottom-right-radius: 22px;
-	-moz-border-radius-topright: 22px;
-	-moz-border-radius-bottomright: 22px;
-	border-top-right-radius: 22px;
-	border-bottom-right-radius: 22px;
+	-webkit-border-top-right-radius: 30px;
+	-webkit-border-bottom-right-radius: 30px;
+	-moz-border-radius-topright: 30px;
+	-moz-border-radius-bottomright: 30px;
+	border-top-right-radius: 30px;
+	border-bottom-right-radius: 30px;
 }
 section.cursos ul {
 }
@@ -337,20 +333,21 @@ section.cursos ul  li{
 section.cursos-secondary h2 {
     background-color: rgba(255, 255, 255, 0.2);
 	background: rgba(255, 255, 255, 0.2);
-    font-size: 1.8em;
+    font-size: 2.8em;
     font-style: italic;
     font-weight: bold;
     margin-bottom: 20px;
     padding: 10px;
+    padding-right:30px;
     text-align: right;
 	color: rgba(255, 255, 255, 0.8);
 	
-	-webkit-border-top-right-radius: 22px;
-	-webkit-border-bottom-right-radius: 22px;
-	-moz-border-radius-topright: 22px;
-	-moz-border-radius-bottomright: 22px;
-	border-top-right-radius: 22px;
-	border-bottom-right-radius: 22px;
+	-webkit-border-top-right-radius: 30px;
+	-webkit-border-bottom-right-radius: 30px;
+	-moz-border-radius-topright: 30px;
+	-moz-border-radius-bottomright: 30px;
+	border-top-right-radius: 30px;
+	border-bottom-right-radius: 30px;
 }
 section.cursos-secondary ul.dropdown {
 	clear:left;
@@ -359,7 +356,7 @@ section.cursos-secondary ul.dropdown {
 }
 section.cursos-secondary ul.dropdown li {
 	margin:10px 0;
-	padding: 7px;
+	padding: 9px 8px 5px;
 	width:120;
 	z-index:600;
 	-webkit-border-bottom-right-radius: 30px;
@@ -394,7 +391,7 @@ section.cursos-secondary ul.dropdown li a {
 }
 
 section.cursos-secondary ul.dropdown ul.submenu {
-	z-index:0;
+	z-index:-2220;
 }
 section.cursos-secondary ul.dropdown ul.submenu  li{
     z-index:  0;
@@ -426,16 +423,9 @@ section.cursos-secondary  .registration a {
 
 
 section.cursos-info {
-	height:280px;
+/*	height:280px;
 	overflow-y:scroll;
-
-	  scrollbar-face-color:#903030;
-   scrollbar-arrow-color:#FFFFFF;
-   scrollbar-track-color:#C0B0B0;
-   scrollbar-shadow-color:rgb(0,0,0);
-   scrollbar-highlight-color:rgb(0,0,0);
-   scrollbar-3dlight-color:#808080;
-   scrollbar-darkshadow-Color:#202020;
+*/
 }
 section.cursos-info h2 {
 	text-transform: uppercase;
@@ -466,6 +456,10 @@ section.cursos-info ul li a {
 	text-transform:normal;
 	margin-bottom:3px;
 	color: #1d2e63;
+}
+
+section.cursos-info ul li a:hover {
+    color:#ffffff;
 }
 
 section.cursos-info p {

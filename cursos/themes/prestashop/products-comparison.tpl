@@ -67,10 +67,10 @@
 				{/if}
 				<!-- availability -->
 				<p class="comparison_availability_statut">
-					{if !(($product->quantity == 0 && !$product->available_later) OR ($product->quantity != 0 && !$product->available_now) OR !$product->available_for_order OR $PS_CATALOG_MODE)}
+					{if !(($product->quantity <= 0 && !$product->available_later) OR ($product->quantity != 0 && !$product->available_now) OR !$product->available_for_order OR $PS_CATALOG_MODE)}
 						<span id="availability_label">{l s='Availability:'}</span>
-						<span id="availability_value"{if $product->quantity == 0} class="warning-inline"{/if}>
-							{if $product->quantity == 0}
+						<span id="availability_value"{if $product->quantity <= 0} class="warning-inline"{/if}>
+							{if $product->quantity <= 0}
 								{if $allow_oosp}
 									{$product->available_later|escape:'htmlall':'UTF-8'}
 								{else}
@@ -86,7 +86,7 @@
 					<a class="button" href="{$product->getLink()}" title="{l s='View'}">{l s='View'}</a>
 					{if (!$product->hasAttributes() OR (isset($add_prod_display) AND ($add_prod_display == 1))) AND !$PS_CATALOG_MODE}
 						{if ($product->quantity > 0 OR $product->allow_oosp) AND $product->customizable != 2}
-							<a class="exclusive ajax_add_to_cart_button" rel="ajax_id_product_{$product->id}" href="{$base_dir}cart.php?qty=1&amp;id_product={$product->id}&amp;token={$static_token}&amp;add" title="{l s='Add to cart'}">{l s='Add to cart'}</a>
+							<a class="exclusive ajax_add_to_cart_button" rel="ajax_id_product_{$product->id}" href="{$link->getPageLink('cart.php')}?qty=1&amp;id_product={$product->id}&amp;token={$static_token}&amp;add" title="{l s='Add to cart'}">{l s='Add to cart'}</a>
 						{else}
 							<span class="exclusive">{l s='Add to cart'}</span>
 						{/if}
@@ -118,8 +118,12 @@
 				{foreach from=$products item=product name=for_products}
 					{assign var='product_id' value=$product->id}
 					{assign var='feature_id' value=$feature.id_feature}
-					{assign var='tab' value=$product_features[$product_id]}
-					<td  width="{$width}%" class="{$classname} comparison_infos">{$tab[$feature_id]|escape:'htmlall':'UTF-8'}</td>
+					{if isset($product_features[$product_id])}
+						{assign var='tab' value=$product_features[$product_id]}
+						<td  width="{$width}%" class="{$classname} comparison_infos">{$tab[$feature_id]|escape:'htmlall':'UTF-8'}</td>
+					{else}
+						<td  width="{$width}%" class="{$classname} comparison_infos"></td>
+					{/if}
 				{/foreach}
 		</tr>
 		{/foreach}

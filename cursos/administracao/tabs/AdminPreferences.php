@@ -270,6 +270,7 @@ class AdminPreferences extends AdminTab
 							$val[$language['id_lang']] = isset($values['cast']) ? $values['cast'](Tools::getValue($field.'_'.$language['id_lang'])) : Tools::getValue($field.'_'.$language['id_lang']);
 					else
 						$val = isset($values['cast']) ? $values['cast'](Tools::getValue($field)) : Tools::getValue($field);
+
 					Configuration::updateValue($field, $val);
 				}
 				Tools::redirectAdmin($currentIndex.'&conf=6'.'&token='.$this->token);
@@ -303,10 +304,11 @@ class AdminPreferences extends AdminTab
 		$tab['db_prefix'] = _DB_PREFIX_;
 		$tab['db_user'] = _DB_USER_;
 		$tab['db_passwd'] = '';
+
 		return $tab;
 	}
 
-	private function	getDivLang($fields)
+	private function getDivLang($fields)
 	{
 		$tab = array();
 		foreach ($fields AS $key => $field)
@@ -347,6 +349,7 @@ class AdminPreferences extends AdminTab
 			if (isset($field['required']) AND $field['required'])
 				$required = true;
 			$val = $this->getVal($confValues, $key);
+
 			if (!in_array($field['type'], array('image', 'radio', 'container', 'container_end')) OR isset($field['show']))
 				echo '<div style="clear: both; padding-top:15px;">'.($field['title'] ? '<label >'.$field['title'].'</label>' : '').'<div class="margin-form" style="padding-top:5px;">';
 
@@ -399,10 +402,10 @@ class AdminPreferences extends AdminTab
 					if ($name == 'themes')
 						echo '
 						<td colspan="'.sizeof($field['list']).'">
-							<b>'.$this->l('In order to use a new theme, please follow this steps:').'</b>
+							<b>'.$this->l('In order to use a new theme, please follow this steps:', get_class()).'</b>
 							<ul>
-								<li>'.$this->l('Import your theme with using this module:').' <a href="index.php?tab=AdminModules&token='.Tools::getAdminTokenLite('AdminModules').'&filtername=themeinstallator" style="text-decoration: underline;">'.$this->l('Theme installator').'</a></li>
-								<li>'.$this->l('When your theme is imported, please select the theme in this page').'</li>
+								<li>'.$this->l('Import your theme with using this module:', get_class()).' <a href="index.php?tab=AdminModules&token='.Tools::getAdminTokenLite('AdminModules').'&filtername=themeinstallator" style="text-decoration: underline;">'.$this->l('Theme installator', get_class()).'</a></li>
+								<li>'.$this->l('When your theme is imported, please select the theme in this page', get_class()).'</li>
 							</ul>
 						</td>
 						</tr>

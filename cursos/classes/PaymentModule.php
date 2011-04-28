@@ -178,11 +178,10 @@ abstract class PaymentModuleCore extends Module
 					$productQuantity = (int)(Product::getQuantity((int)($product['id_product']), ($product['id_product_attribute'] ? (int)($product['id_product_attribute']) : NULL)));
 					$quantityInStock = ($productQuantity - (int)($product['cart_quantity']) < 0) ? $productQuantity : (int)($product['cart_quantity']);
 					if ($id_order_state != _PS_OS_CANCELED_ AND $id_order_state != _PS_OS_ERROR_)
-					{
+                                        {
 						if (Product::updateQuantity($product, (int)$order->id))
 							$product['stock_quantity'] -= $product['cart_quantity'];
-
-						if ($product['stock_quantity'] < 0)
+						if ($product['stock_quantity'] < 0 && Configuration::get('PS_STOCK_MANAGEMENT'))
 							$outOfStock = true;
 
 						Hook::updateQuantity($product, $order);
@@ -368,6 +367,19 @@ abstract class PaymentModuleCore extends Module
 					'{firstname}' => $customer->firstname,
 					'{lastname}' => $customer->lastname,
 					'{email}' => $customer->email,
+					'{delivery_block_txt}' => $this->_getFormatedAddress($delivery, "\n"),
+					'{invoice_block_txt}' => $this->_getFormatedAddress($invoice, "\n"),
+					'{delivery_block_html}' => $this->_getFormatedAddress($delivery, "<br />", array(
+			'firstname'	=> '<span style="color:#DB3484; font-weight:bold;">%s</span>'
+			, 'lastname'	=> '<span style="color:#DB3484; font-weight:bold;">%s</span>'
+
+		)),
+					'{invoice_block_html}' => $this->_getFormatedAddress($invoice, "<br />", array(
+			'firstname'	=> '<span style="color:#DB3484; font-weight:bold;">%s</span>'
+			, 'lastname'	=> '<span style="color:#DB3484; font-weight:bold;">%s</span>'
+
+		)),
+
 					'{delivery_company}' => $delivery->company,
 					'{delivery_firstname}' => $delivery->firstname,
 					'{delivery_lastname}' => $delivery->lastname,
@@ -437,6 +449,57 @@ abstract class PaymentModuleCore extends Module
 		}
 	}
 
+	/**
+	 * @param Object Address $the_address that needs to be txt formated
+	 * @return String the txt formated address block
+	 */
+	private function _getTxtFormatedAddress($the_address)
+	{
+		$out = '';
+		$adr_fields = AddressFormat::getOrderedAddressFields($the_address->id_country);
+		$r_values = array();
+		foreach($adr_fields as $fields_line)
+		{
+			$tmp_values = array();
+			foreach (explode(' ', $fields_line) as $field_item)
+			{
+				$field_item = trim($field_item);
+				$tmp_values[] = $the_address->{$field_item};
+			}
+			$r_values[] = implode(' ', $tmp_values);
+		}
+
+		$out = implode("\n", $r_values);
+		return $out;
+	}
+
+	/**
+	 * @param Object Address $the_address that needs to be txt formated
+	 * @return String the txt formated address block
+	 */
+
+	private function _getFormatedAddress(Address $the_address, $line_sep, $fields_style = array())
+	{
+		$out = '';
+		$adr_fields = AddressFormat::getOrderedAddressFields($this->id_country);
+
+		$r_values = array();
+
+		foreach($adr_fields as $fields_line)
+		{
+			$tmp_values = array();
+			foreach (explode(' ', $fields_line) as $field_item)
+			{
+				$field_item = trim($field_item);
+				$tmp_values[] = (isset($fields_style[$field_item]))? sprintf($fields_style[$field_item], $the_address->{$field_item}) : $the_address->{$field_item};
+			}
+			$r_values[] = implode(' ', $tmp_values);
+		}
+
+
+		$out = implode($line_sep, $r_values);
+		return $out;
+	}
 
 	/**
 	 * @param int $id_currency : this parameter is optionnal but on 1.5 version of Prestashop, it will be REQUIRED

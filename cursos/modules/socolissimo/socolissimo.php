@@ -57,6 +57,7 @@ class Socolissimo extends CarrierModule
 		$this->name = 'socolissimo';
 		$this->tab = 'shipping_logistics';
 		$this->version = '2.0';
+		$this->author = 'PrestaShop';
 		$this->limited_countries = array('fr');
 
 		parent::__construct ();
@@ -64,7 +65,7 @@ class Socolissimo extends CarrierModule
 		$this->page = basename(__FILE__, '.php');
 		$this->displayName = $this->l('So Colissimo');
 		$this->description = $this->l('Offer your customers, different delivery methods with LaPoste.');
-		$this->url = 'http://'.htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'modules/'.$this->name.'/validation.php';
+		$this->url = Tools::getProtocol().htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'modules/'.$this->name.'/validation.php';
 
 		if (self::isInstalled($this->name))
 		{

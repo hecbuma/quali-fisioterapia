@@ -55,12 +55,22 @@ class MondialRelay extends Module
 	public function install()
 	{
 		global $cookie;
+		$name = "shipping";
+		$title = "Mondial Relay API";
+
 		if (!parent::install())
 			return false;
 
-		$rpos = Db::getInstance()->ExecuteS('SELECT `name` FROM `' . _DB_PREFIX_ . 'hook` WHERE `name` ="shipping"');
-		if ($rpos[0]['name'] != "shipping")
-			Db::getInstance()->Execute('INSERT INTO ' . _DB_PREFIX_ . 'hook (name, title, description, position) VALUES("shipping", "Mondial Relay API", NULL, 0)');
+		Db::getInstance()->ExecuteS(
+			'SELECT `name` 
+			FROM `' . _DB_PREFIX_ . 'hook` 
+			WHERE `name` = \''.$name.'\' 
+			AND `title` = \''.$title.'\'');
+
+		if (!Db::getInstance()->NumRows())
+			Db::getInstance()->Execute('INSERT INTO ' . _DB_PREFIX_ . 'hook 
+			(name, title, description, position) 
+			VALUES(\''.$name.'\', \''.$title.'\', NULL, 0)');
 
 		if (!$this->registerHook('shipping') OR
 			!$this->registerHook('extraCarrier') OR
@@ -81,30 +91,42 @@ class MondialRelay extends Module
 			if (!empty($query))
 				Db::getInstance()->Execute(trim($query));
 
-		$rpos = Db::getInstance()->ExecuteS('SELECT id_tab  FROM `' . _DB_PREFIX_ . 'tab` WHERE  class_name="AdminMondialRelay"   LIMIT 0 , 1');
-		$id_tab = $rpos[0]['id_tab'];	
-		if ($id_tab <= 0)
+		$result = Db::getInstance()->getRow('
+			SELECT id_tab  
+			FROM `' . _DB_PREFIX_ . 'tab`
+			WHERE class_name="AdminMondialRelay"');
+
+		if (!$result)
 		{
 			/*tab install */
 
-			$rpos = Db::getInstance()->ExecuteS('SELECT position  FROM `' . _DB_PREFIX_ . 'tab` WHERE `id_parent` = 3 ORDER BY `'. _DB_PREFIX_ .'tab`.`position` DESC LIMIT 0 , 1');
-			$pos = $rpos[0]['position'];	
-			$pos++;
-		
-			Db::getInstance()->Execute('INSERT INTO ' . _DB_PREFIX_ . 'tab (id_parent, class_name, position, module) VALUES("3", "AdminMondialRelay",  "'.(int)($pos).'", "mondialrelay")');	 	
+			$result = Db::getInstance()->getRow('
+				SELECT position 
+				FROM `' . _DB_PREFIX_ . 'tab` 
+				WHERE `id_parent` = 3
+				ORDER BY `'. _DB_PREFIX_ .'tab`.`position` DESC');
 
-			$rpos = Db::getInstance()->ExecuteS('SELECT id_tab  FROM `' . _DB_PREFIX_ . 'tab` WHERE `id_parent`= 3 and class_name="AdminMondialRelay"   LIMIT 0 , 1');
-			$id_tab = $rpos[0]['id_tab'];		
+			$pos = (isset($result['position'])) ? $result['position'] + 1 : 0;
+
+			Db::getInstance()->Execute('INSERT INTO ' . _DB_PREFIX_ . 'tab 
+				(id_parent, class_name, position, module) 
+				VALUES(3, "AdminMondialRelay",  "'.(int)($pos).'", "mondialrelay")');	 	
+
+			$id_tab = Db::getInstance()->Insert_ID();		
 			
-        	$languages = Language::getLanguages();
+			$languages = Language::getLanguages();
 			foreach ($languages AS $language)
-		    	Db::getInstance()->Execute('INSERT INTO ' . _DB_PREFIX_ . 'tab_lang (id_lang,id_tab,name) VALUES("'.(int)($language['id_lang']).'", "'.(int)($id_tab).'", "Mondial Relay")');
+				Db::getInstance()->Execute('
+				INSERT INTO ' . _DB_PREFIX_ . 'tab_lang 
+				(id_lang, id_tab, name) 
+				VALUES("'.(int)($language['id_lang']).'", "'.(int)($id_tab).'", "Mondial Relay")');
 
 			$profiles = Profile::getProfiles(Configuration::get('PS_LANG_DEFAULT'));
 			foreach ($profiles as $profile)
-				Db::getInstance()->Execute('INSERT INTO ' . _DB_PREFIX_ . 'access (`id_profile`,`id_tab`,`view`,`add`,`edit`,`delete`)
-											VALUES('.$profile['id_profile'].', '.(int)($id_tab).', 1, 1, 1, 1)');
-			
+				Db::getInstance()->Execute('INSERT INTO ' . _DB_PREFIX_ . 'access 
+				(`id_profile`,`id_tab`,`view`,`add`,`edit`,`delete`)
+				VALUES('.$profile['id_profile'].', '.(int)($id_tab).', 1, 1, 1, 1)');
+
 			@copy(_PS_MODULE_DIR_.'mondialrelay/AdminMondialRelay.gif', _PS_IMG_DIR_.'t/AdminMondialRelay.gif');
 		}	
 
@@ -126,14 +148,20 @@ class MondialRelay extends Module
 		if (!parent::uninstall())
 			return false;
 		
-		/* Tab uninstallation */
-		$rpos = Db::getInstance()->ExecuteS('SELECT id_tab  FROM `' . _DB_PREFIX_ . 'tab` WHERE  class_name="AdminMondialRelay"   LIMIT 0 , 1');
-		$id_tab = $rpos[0]['id_tab'];
-		if (isset($id_tab) AND !empty($id_tab))
-		{	
-			Db::getInstance()->Execute('DELETE FROM ' . _DB_PREFIX_ . 'tab WHERE id_tab = '.(int)($id_tab));
-			Db::getInstance()->Execute('DELETE FROM ' . _DB_PREFIX_ . 'tab_lang WHERE id_tab = '.(int)($id_tab));
-			Db::getInstance()->Execute('DELETE FROM ' . _DB_PREFIX_ . 'access WHERE id_tab = '.(int)($id_tab));
+	/* Tab uninstallation */
+		$result = Db::getInstance()->getRow('
+			SELECT id_tab  
+			FROM `' . _DB_PREFIX_ . 'tab`
+			WHERE class_name="AdminMondialRelay"');
+		if ($result)
+		{
+			$id_tab = $result['id_tab'];
+			if (isset($id_tab) AND !empty($id_tab))
+			{	
+				Db::getInstance()->Execute('DELETE FROM ' . _DB_PREFIX_ . 'tab WHERE id_tab = '.(int)($id_tab));
+				Db::getInstance()->Execute('DELETE FROM ' . _DB_PREFIX_ . 'tab_lang WHERE id_tab = '.(int)($id_tab));
+				Db::getInstance()->Execute('DELETE FROM ' . _DB_PREFIX_ . 'access WHERE id_tab = '.(int)($id_tab));
+			}
 		}
 
 		if (!Configuration::deleteByName('MONDIAL_RELAY_1_4') OR
@@ -310,6 +338,7 @@ class MondialRelay extends Module
 			}
 			elseif (!Configuration::get('PS_ORDER_PROCESS_TYPE'))
 			{
+				
 				if (empty($_POST['MR_Selected_Num_'.$cart->id_carrier])) // Case error : the customer didn't choose a 'relais' but selected Relais Colis TNT as a carrier 
 					Tools::redirect('order.php?step=2&mr_null');
 				else
@@ -426,7 +455,7 @@ class MondialRelay extends Module
 							'carriersextra' => $resultsArray));
 			$nbcarriers = $nbcarriers + $i;
 			return $this->display(__FILE__, 'mondialrelay.tpl');
-		}	
+		}
 	}
 	
 	public function getContent()
@@ -615,7 +644,10 @@ class MondialRelay extends Module
 					</li>
 
 					<li>	
-						<label for="mr_Pays_list" class="shipLabel">'.$this->l('Delivery countries:').'<sup>*</sup></label>	
+					<label for="mr_Pays_list" class="shipLabel">'.$this->l('Delivery countries:').'<sup>*</sup><br /><br />
+					<span style="font-size:10px; width:200px;float:left; color:forestgreen">'.
+					$this->l('You can choose several countries by pressing Ctrl while selecting countries').'</span>
+					</label>	
 						<select name="mr_Pays_list[]" id="mr_Pays_list" multiple size="5">
 							<option value="FR">'.$this->l('France').'</option>
 							<option value="BE">'.$this->l('Belgium').'</option>
@@ -854,6 +886,6 @@ class MondialRelay extends Module
 			'Settings updated' => $this->l('Settings updated'),
 			'Empty address : Are you sure you have set a valid address on the contact page?' => $this->l('Empty address : Are you sure you have set a valid address on the contact page?')
 		);
-		return $trad[$key];
+		return (array_key_exists($key, $trad)) ? $trad[$key] : $key;
 	}
 }

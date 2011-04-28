@@ -284,13 +284,13 @@ class ProductCore extends ObjectModel
 		//d('a');
 		return Db::getInstance()->ExecuteS('
 		SELECT `id_image` as id
-		FROM `'._DB_PREFIX_.'image` 
+		FROM `'._DB_PREFIX_.'image`
 		WHERE `id_product` = '.(int)($this->id).'
 		ORDER BY `position`');
 	}
-	
-	
-	
+
+
+
 	public	function __construct($id_product = NULL, $full = false, $id_lang = NULL)
 	{
 		global $cart;
@@ -524,7 +524,7 @@ class ProductCore extends ObjectModel
 	public static function updateDefaultAttribute($id_product)
 	{
 		$id_product_attribute = self::getDefaultAttribute($id_product);
-		Db::getInstance()->Execute('UPDATE '._DB_PREFIX_.'product SET cache_default_attribute = '.(int)($id_product_attribute).' WHERE id_product = '.(int)($id_product_attribute).' LIMIT 1');
+		Db::getInstance()->Execute('UPDATE '._DB_PREFIX_.'product SET cache_default_attribute = '.(int)($id_product_attribute).' WHERE id_product = '.(int)($id_product).' LIMIT 1');
 	}
 
 	public function validateFieldsLang($die = true, $errorReturn = false)
@@ -629,7 +629,7 @@ class ProductCore extends ObjectModel
 
 		$newCategPos=array();
 		foreach ($categories as $id_category)
-			$newCategPos[$id_category] = isset($newCategories[$id_category])?$newCategories[$id_category]['newPos']:0;
+			$newCategPos[$id_category] = isset($newCategories[$id_category])?$newCategories[$id_category]:0;
 
 		$productCats = array();
 
@@ -1713,26 +1713,40 @@ class ProductCore extends ObjectModel
 		}
 		$quantity = ($id_cart AND $cart_quantity) ? $cart_quantity : $quantity;
 		$id_currency = (int)(Validate::isLoadedObject($cur_cart) ? $cur_cart->id_currency : ((isset($cookie->id_currency) AND (int)($cookie->id_currency)) ? $cookie->id_currency : Configuration::get('PS_CURRENCY_DEFAULT')));
-		if (!$id_address)
-			$id_address = $cur_cart->{Configuration::get('PS_TAX_ADDRESS_TYPE')};
 
-		if (Tax::excludeTaxeOption())
-			$usetax = false;
 
+		// retrieve address informations
       $id_country = (int)Country::getDefaultCountryId();
 		$id_state = 0;
 		$id_county = 0;
-		$id_state = 0;
 
 
-		$address_infos = Address::getCountryAndState($id_address);
-		if ($address_infos['id_country'])
+		if (!$id_address)
 		{
-			$id_country = (int)($address_infos['id_country']);
-			$id_state = (int)($address_infos['id_state']);
-			$id_county = (int)County::getIdCountyByZipCode($address_infos['id_state'], $address_infos['postcode']);
+			if ($id_address = $cur_cart->{Configuration::get('PS_TAX_ADDRESS_TYPE')})
+			{
+				$address_infos = Address::getCountryAndState($id_address);
+				if ($address_infos['id_country'])
+				{
+					$id_country = (int)($address_infos['id_country']);
+					$id_state = (int)($address_infos['id_state']);
+					$postcode = (int)$address_infos['postcode'];
+
+					$id_county = (int)County::getIdCountyByZipCode($id_state, $postcode);
+				}
+			} else if (isset($cookie->id_country)) {
+				// fetch address from cookie
+		      $id_country = (int)$cookie->id_country;
+				$id_state = (int)$cookie->id_state;
+				$postcode = (int)$cookie->postcode;
+
+				$id_county = (int)County::getIdCountyByZipCode($id_state, $postcode);
+			}
 
 		}
+
+		if (Tax::excludeTaxeOption())
+			$usetax = false;
 
 		if ($usetax != false AND !empty($address_infos['vat_number']) AND $address_infos['id_country'] != Configuration::get('VATNUMBER_COUNTRY') AND Configuration::get('VATNUMBER_MANAGEMENT'))
 			$usetax = false;
@@ -1769,7 +1783,7 @@ class ProductCore extends ObjectModel
 			$product_attribute_label = 'NULL';
 		else
 			$product_attribute_label = ($id_product_attribute === false ? 'false' : $id_product_attribute);
-		$cacheId = $id_product.'-'.$id_shop.'-'.$id_currency.'-'.$id_country.'-'.$id_group.'-'.$quantity.'-'.$product_attribute_label.'-'.($use_tax?'1':'0').'-'.$decimals.'-'.($only_reduc?'1':'0').'-'.($use_reduc?'1':'0');
+		$cacheId = $id_product.'-'.$id_shop.'-'.$id_currency.'-'.$id_country.'-'.$id_state.'-'.$id_county.'-'.$id_group.'-'.$quantity.'-'.$product_attribute_label.'-'.($use_tax?'1':'0').'-'.$decimals.'-'.($only_reduc?'1':'0').'-'.($use_reduc?'1':'0').'-'.$with_ecotax;
 
 		if (isset(self::$_prices[$cacheId]))
 			return self::$_prices[$cacheId];
@@ -1778,13 +1792,13 @@ class ProductCore extends ObjectModel
 		$cacheId2 = $id_product.'-'.$id_product_attribute;
 		if (!isset(self::$_pricesLevel2[$cacheId2]))
 			self::$_pricesLevel2[$cacheId2] = Db::getInstance(_PS_USE_SQL_SLAVE_)->getRow('
-			SELECT p.`price`, p.`ecotax`,
-			'.($id_product_attribute ? 'pa.`price`' : 'IFNULL((SELECT pa.price FROM `'._DB_PREFIX_.'product_attribute` pa WHERE id_product = '.(int)($id_product).' AND default_on = 1), 0)').' AS attribute_price
+			SELECT p.`price`,
+			'.($id_product_attribute ? 'pa.`price`' : 'IFNULL((SELECT pa.price FROM `'._DB_PREFIX_.'product_attribute` pa WHERE id_product = '.(int)($id_product).' AND default_on = 1), 0)').' AS attribute_price,
+			'.($id_product_attribute ? 'pa.`ecotax`' : 'p.`ecotax`').'
 			FROM `'._DB_PREFIX_.'product` p
 			'.($id_product_attribute ? 'LEFT JOIN `'._DB_PREFIX_.'product_attribute` pa ON pa.`id_product_attribute` = '.(int)($id_product_attribute) : '').'
 			WHERE p.`id_product` = '.(int)($id_product));
 		$result = self::$_pricesLevel2[$cacheId2];
-
 
 		// Cache for specific prices
 		$cacheId3 = $id_product.'-'.$id_shop.'-'.$id_currency.'-'.$id_country.'-'.$id_group.'-'.$quantity;
@@ -1824,10 +1838,10 @@ class ProductCore extends ObjectModel
 
 		        if (!$specific_price['id_currency'])
 		            $reduction_amount = Tools::convertPrice($reduction_amount, $id_currency);
-		        $reduc = Tools::ps_round(!$use_tax ? $reduction_amount / (1 + $tax_rate / 100) : $reduction_amount, 2);
+		        $reduc = Tools::ps_round(!$use_tax ? $reduction_amount / (1 + $tax_rate / 100) : $reduction_amount, $decimals);
 		    }
 			else
-		        $reduc = Tools::ps_round($price * $specific_price['reduction'], 2);
+		        $reduc = Tools::ps_round($price * $specific_price['reduction'], $decimals);
 		}
 
 		if ($only_reduc)
@@ -1908,7 +1922,7 @@ class ProductCore extends ObjectModel
 	{
 		return self::getPriceStatic((int)($this->id), $tax, $id_product_attribute, $decimals, $divisor, $only_reduc, $usereduc, $quantity);
 	}
-	
+
 	/**
 	 * @deprecated
 	 */
@@ -1917,7 +1931,7 @@ class ProductCore extends ObjectModel
 		Tools::displayAsDeprecated();
 		return $this->getIdProductAttributeMostExpensive();
 	}
-	
+
 	public function getIdProductAttributeMostExpensive()
 	{
 		$row = Db::getInstance(_PS_USE_SQL_SLAVE_)->getRow('
@@ -2439,19 +2453,19 @@ class ProductCore extends ObjectModel
 
 	public static function duplicateTags($id_product_old, $id_product_new)
 	{
-		$resource = Db::getInstance()->Execute('SELECT `id_tag` FROM `'._DB_PREFIX_.'product_tag` WHERE `id_product` = '.(int)($id_product_old));
+		$tags = Db::getInstance()->ExecuteS('SELECT `id_tag` FROM `'._DB_PREFIX_.'product_tag` WHERE `id_product` = '.(int)($id_product_old));
 		if (!Db::getInstance()->NumRows())
 			return true;
 		$query = 'INSERT INTO `'._DB_PREFIX_.'product_tag` (`id_product`, `id_tag`) VALUES';
-		while ($row = Db::getInstance()->nextRow($resource))
-			$query .= ' ('.(int)($id_product_new).', '.(int)($row['id_tag']).'),';
+		foreach($tags as $tag)
+			$query .= ' ('.(int)($id_product_new).', '.(int)($tag['id_tag']).'),';
 		$query = rtrim($query, ',');
 		return Db::getInstance()->Execute($query);
 	}
 
 	public static function duplicateDownload($id_product_old, $id_product_new)
 	{
-		$resource = Db::getInstance()->Execute('SELECT `display_filename`, `physically_filename`, `date_deposit`, `date_expiration`, `nb_days_accessible`, `nb_downloadable`, `active` FROM `'._DB_PREFIX_.'product_download` WHERE `id_product` = '.(int)($id_product_old));
+		$resource = Db::getInstance()->ExecuteS('SELECT `display_filename`, `physically_filename`, `date_deposit`, `date_expiration`, `nb_days_accessible`, `nb_downloadable`, `active` FROM `'._DB_PREFIX_.'product_download` WHERE `id_product` = '.(int)($id_product_old));
 		if (!Db::getInstance()->NumRows())
 			return true;
 		$query = 'INSERT INTO `'._DB_PREFIX_.'product_download` (`id_product`, `display_filename`, `physically_filename`, `date_deposit`, `date_expiration`, `nb_days_accessible`, `nb_downloadable`, `active`) VALUES';
@@ -2641,7 +2655,10 @@ class ProductCore extends ObjectModel
         $row['specific_prices'] = $specific_prices;
 		$row['price_without_reduction'] = Product::getPriceStatic((int)$row['id_product'], true, ((isset($row['id_product_attribute']) AND !empty($row['id_product_attribute'])) ? (int)($row['id_product_attribute']) : NULL), 6, NULL, false, false);
 		if ($row['id_product_attribute'])
+		{
+			$row['quantity_all_versions'] = $row['quantity'];
 			$row['quantity'] = Product::getQuantity((int)$row['id_product'], $row['id_product_attribute'], isset($row['cache_is_pack']) ? $row['cache_is_pack'] : NULL);
+		}
 		$row['id_image'] = Product::defineProductImage($row, $id_lang);
 		$row['features'] = Product::getFrontFeaturesStatic((int)$id_lang, $row['id_product']);
 		$row['attachments'] = ((!isset($row['cache_has_attachments']) OR $row['cache_has_attachments']) ? Product::getAttachmentsStatic((int)($id_lang), $row['id_product']) : array());
@@ -2973,7 +2990,7 @@ class ProductCore extends ObjectModel
 		if (isset(self::$_incat[md5($sql)]))
 			return self::$_incat[md5($sql)];
 
-		if (!Db::getInstance(_PS_USE_SQL_SLAVE_)->Execute($sql))
+		if (!Db::getInstance(_PS_USE_SQL_SLAVE_)->ExecuteS($sql))
 			return false;
 		self::$_incat[md5($sql)] =  (Db::getInstance(_PS_USE_SQL_SLAVE_)->NumRows() > 0 ? true : false);
 		return self::$_incat[md5($sql)];

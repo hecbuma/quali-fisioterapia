@@ -225,7 +225,7 @@ class ThemeInstallator extends Module
 		else if (Tools::isSubmit('submitImport2'))
 		{
 			$zip = new ZipArchive();
-			if (!Validate::isModuleUrl($url = Tools::getValue('linkurl'), null))
+			if (!Validate::isModuleUrl($url = Tools::getValue('linkurl'), $this->errors))
 				$this->errors .= parent::displayError($this->l('Only zip files are allowed'));
 			else if (!copy($url, ARCHIVE_NAME))
 				$this->errors .= parent::displayError($this->l('Error during the file download'));
@@ -770,7 +770,8 @@ class ThemeInstallator extends Module
 	{			
 		$count = 0;
 		$zip = new ZipArchive();
-		if ($zip->open(_EXPORT_FOLDER_.'archive.zip', ZipArchive::OVERWRITE) === true)
+		$zip_file_name = md5(time()).".zip";
+		if ($zip->open(_EXPORT_FOLDER_.$zip_file_name, ZipArchive::OVERWRITE) === true)
 		{
 			if (!$zip->addFromString('Config.xml', $this->xmlFile))
 				$this->error = true;
@@ -794,8 +795,8 @@ class ThemeInstallator extends Module
 			{
 				ob_end_clean();
 				header('Content-Type: multipart/x-zip');
-				header('Content-Disposition:attachment;filename="archive.zip"');
-				readfile(_EXPORT_FOLDER_.'archive.zip');
+				header('Content-Disposition:attachment;filename="'.$zip_file_name.'"');
+				readfile(_EXPORT_FOLDER_.$zip_file_name);
 				die ;
 			}
 		}

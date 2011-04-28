@@ -47,8 +47,8 @@ class AdminCategories extends AdminTab
 
 		$this->fieldsDisplay = array(
 		'id_category' => array('title' => $this->l('ID'), 'align' => 'center', 'width' => 30),
-		'name' => array('title' => $this->l('Name'), 'width' => 100),
-		'description' => array('title' => $this->l('Description'), 'width' => 500, 'maxlength' => 90, 'orderby' => false),
+		'name' => array('title' => $this->l('Name'), 'width' => 350),
+		'description' => array('title' => $this->l('Description'), 'width' => 250, 'maxlength' => 50, 'orderby' => false),
 		'position' => array('title' => $this->l('Position'), 'width' => 40,'filter_key' => 'position', 'align' => 'center', 'position' => 'position'),
 		'active' => array('title' => $this->l('Displayed'), 'active' => 'status', 'align' => 'center', 'type' => 'bool', 'orderby' => false));
 		

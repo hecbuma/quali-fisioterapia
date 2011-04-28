@@ -92,14 +92,16 @@ class Twenga extends PaymentModule
 	 * need to be in lowercase
 	 * @var array
 	 */
-	public $limited_countries = array('fr', 'de', 'gb', 'uk');
+	public $limited_countries = array('fr', 'de', 'gb', 'uk', 'it', 'es');
+
+	private $_currentIsoCodeCountry = NULL;
 	
 	/**
 	 * The current country iso code for the shop.
 	 * @var string
 	 */
 	private static $shop_country;
-	
+
 	public function __construct()
 	{
 		// Basic vars
@@ -108,15 +110,18 @@ class Twenga extends PaymentModule
 		$this->token = Tools::getValue('token');
 	 	$this->name = 'twenga';
 	 	$this->tab = 'smart_shopping';
-	 	$this->version = '1.3';
+	 	$this->version = '1.5';
 		
 	 	parent::__construct();
-		
+	
 		$this->displayName = $this->l('Twenga API');
-		$this->description = $this->l('Export your products to Twenga.com and use the Twenga tracker for customers\' order.');
-		
+		$this->description = $this->l('Module role: export of your products on Twenga and installation of the sales tracking brought by Twenga (requires to sign up to Twenga)');
+
 		// For Twenga subscription
-		$this->site_url = Tools::htmlentitiesutf8('http://'.$_SERVER['HTTP_HOST'].__PS_BASE_URI__);
+		$protocol = 'http://';
+		if (isset($_SERVER['https']) && $_SERVER['https'] != 'off')
+			$protocol = 'http://';
+		$this->site_url = Tools::htmlentitiesutf8($protocol.$_SERVER['HTTP_HOST'].__PS_BASE_URI__);
 		self::$base_dir = _PS_ROOT_DIR_.'/modules/twenga/';
 		self::$base_path = $this->site_url.'/modules/twenga/';
 		$this->feed_url = self::$base_path.'export.php';
@@ -141,7 +146,9 @@ class Twenga extends PaymentModule
 			self::$obj_twenga = new TwengaObj();
 		if (self::$obj_ps_stats === NULL)
 			self::$obj_ps_stats = new PrestashopStats($this->site_url);
+		$this->_initCurrentIsoCodeCountry();
 	}
+
 	/**
 	 * For uninstall just need to delete the Merchant Login.
 	 * @return bool see parent class.
@@ -153,6 +160,116 @@ class Twenga extends PaymentModule
 			return false;
 		return true;
 	}
+
+	private function _initCurrentIsoCodeCountry()
+	{
+		global $cookie;
+
+		$country = Db::getInstance()->ExecuteS('
+			SELECT c.iso_code as iso
+			FROM '._DB_PREFIX_.'country as c
+			LEFT JOIN '._DB_PREFIX_.'country_lang as c_l
+			ON c_l.id_country = c.id_country
+			WHERE c_l.id_lang = '.$cookie->id_lang.' 
+			AND c.id_country = '.	Configuration::get('PS_COUNTRY_DEFAULT'));
+
+		if (isset($country[0]['iso']))
+			$this->_currentIsoCodeCountry = $country[0]['iso'];
+	}
+
+	public function ajaxRequestType()
+	{	
+		if (isset($_POST) && isset($_POST['type']) && isset($_POST['base']))
+		{
+			$link = 'http://addons.prestashop.com/'.Language::getIsoById($_POST['id_lang']).
+				'/2053-twenga-ready-to-sell.html';
+
+			$type = (($_POST['type'] == 'desactive') ? $this->l('Disable') : 
+				(($_POST['type'] == 'reset') ? $this->l('Reset') : 
+				(($_POST['type'] == 'uninstall') ? $this->l('Uninstall') : $this->l('Delete'))));
+
+			$url = $_POST['base'].'&token='.$_POST['token'].'&module_name='.
+				$_POST['module_name'].'&tab_module='.$_POST['tab_module'].'&'.
+				$_POST['type'].'='.$_POST['module_name'];
+			
+			$msg = '
+				<style>
+					#mainContent {
+						border:1px solid #B0C4DE;
+						background-color:#E2EBEE;
+						-moz-border-radius:10px;
+						-webkit-border-radius:10px;
+						line-height:18px;
+						font-size:14px; }
+
+					#mainContent a { text-decoration:none; color:#268CCD;}
+			</style>
+			<div id="mainContent" >
+				<p>'.$this->l('If you subscriber on Twenga, the activation of this module is mandatory.').
+				'<br /><br />'.$this->l('In case of dysfunction, uninstall this module, install the newer version here and fill up again Twenga hashkey and login.').'
+				<br /><br />'.$this->l('To unsubscribe or for any question, please contact Twenga on your account.').'
+				<div style="margin: 10px 0 5px 0; font-size:14px; color:#FFF; text-align:center;">
+				<b><a '.(($_POST['type'] == 'uninstall') ? 
+				'onClick="$.fancybox.close(); window.location=\''.$url.'\' '. 
+				$this->_getAjaxScript('send_mail.php', $_POST['type'], $url, false).'"' : ' ') . 
+				'href="'.$url.'">'.$type.'</a></b>  - 
+				<b><a href="'.$link.'">'.
+				$this->l('Newer version').'</a></b> - 
+				<b><a href="javacript:void(0);"i onclick="$.fancybox.close(); return false;">'.
+				$this->l('Cancel').'</a></b>
+				</div></p>';
+			echo $msg;
+		}
+	}
+
+	/*
+	 ** Get the javascript code to fetch a distant file
+	 ** href will be automatically split cause of its '&'
+	 */
+	private function _getAjaxScript($file, $type, $href, $displayMsg = true)
+	{
+		global $cookie;
+
+		return '
+				$.ajax({
+						type: \'POST\',
+						url: \''._MODULE_DIR_.'twenga/'.$file.'\',
+						data: \'type='.$type.'&base='.$href.'&id_lang='.(int)$cookie->id_lang.'\',
+						success: function(msg) {
+							'.(($displayMsg) ? '
+							$.fancybox(msg, {
+								\'autoDimensions\'	: false,
+								\'width\'						: 450,
+								\'height\'					: \'auto\',
+								\'transitionIn\'		: \'none\',
+								\'transitionOut\'		: \'none\'	});'
+								: '') . '
+						}
+		});
+		return false;';
+	}
+
+	public function onclickOption($type, $href = false)
+	{
+		$content = '';
+
+		switch($type)
+		{
+		case 'desactive':
+			$content = $this->_getAjaxScript('infos_update.php', $type, $href);
+			break;
+		case 'reset':
+			$content = $this->_getAjaxScript('infos_update.php', $type, $href);
+			break;
+		case 'delete':
+			$content = $this->_getAjaxScript('infos_update.php', $type, $href);
+			break;
+		case 'uninstall':
+			$content = $this->_getAjaxScript('infos_update.php', $type, $href);
+		default:
+		}
+		return $content;
+	}
 	
 	/**
 	 * Method for beeing redirected to Twenga subscription
@@ -161,6 +278,7 @@ class Twenga extends PaymentModule
 	{
 		echo '<script type="text/javascript" language="javascript">window.open("'.$link.'");</script>';
 	}
+
 	private function submitTwengaSubscription()
 	{
 		 unset($_POST['submitTwengaSubscription']);
@@ -177,6 +295,7 @@ class Twenga extends PaymentModule
 			$this->_errors[] = $this->l('Error occurred with the Twenga API method (see details) : ').'<br /> '.nl2br($e->getMessage());
 		}
 	}
+
 	private function submitTwengaLogin()
 	{
 		if (!self::$obj_twenga->setHashkey($_POST['twenga_hashkey']))
@@ -197,9 +316,12 @@ class Twenga extends PaymentModule
 			}
 			if(!$bool_save)
 				$this->_errors[] = $this->l('Authentication failed.')."<br />\n"
-					.$this->l('Please review the e-mail sent by Twenga after subscription. If error still occurred, contact Twenga service.');
+				.$this->l('Please review the e-mail sent by Twenga after subscription. If error still occurred, contact Twenga service.');
+			else
+				self::$obj_twenga->addFeed(array('feed_url' => $this->feed_url));
 		}
 	}
+
 	private function submitTwengaActivateTracking()
 	{
 		$activate = false;
@@ -217,6 +339,7 @@ class Twenga extends PaymentModule
 			$this->registerHook('cancelProduct');
 		}
 	}
+
 	private function submitTwengaDisableTracking()
 	{
 		$return = Db::getInstance()->ExecuteS('SELECT `id_hook` FROM `'._DB_PREFIX_.'hook_module` WHERE `id_module` = \''.pSQL($this->id).'\'');
@@ -225,6 +348,7 @@ class Twenga extends PaymentModule
 			$this->unregisterHook($hook['id_hook']);
 		}
 	}
+
 	public function preProcess()
 	{
 		if(isset($_POST['submitTwengaSubscription']))
@@ -244,6 +368,7 @@ class Twenga extends PaymentModule
 			$this->submitTwengaDisableTracking();
 		}
 	}
+
 	public function hookCancelProduct($params)
 	{
 		if((float)$params['order']->total_products_wt <= 0)
@@ -267,6 +392,7 @@ class Twenga extends PaymentModule
 			}
 		}
 	}
+
 	public function hookUpdateOrderStatus($params)
 	{
 		if( (int)$params['newOrderStatus']->unremovable === 1
@@ -294,6 +420,7 @@ class Twenga extends PaymentModule
 			}
 		}
 	}
+
 	public function hookPayment($params)
 	{
 		$customer = new Customer($params['cart']->id_customer);
@@ -350,8 +477,76 @@ class Twenga extends PaymentModule
 		}
 	}
 	
+	/*
+	 ** Get the current country name used literaly
+	 */
+	static public function getCurrentCountryName()
+	{
+		global $cookie;
+
+		$id_lang = ((isset($cookie->id_lang)) ? $cookie->id_lang : 
+			((isset($_POST['id_lang'])) ? $_POST['id_lang'] : NULL));
+
+		if ($id_lang === NULL)
+			return 'Undefined id_lang';
+		$country = Db::getInstance()->ExecuteS('
+			SELECT c.name as name
+			FROM '._DB_PREFIX_.'country_lang as c
+			WHERE c.id_lang = '.$id_lang.' 
+			AND c.id_country = '.	Configuration::get('PS_COUNTRY_DEFAULT'));
+	
+		if (!isset($country[0]['name']))
+			$country[0]['name'] = 'Undefined';
+		return $country[0]['name'];
+	}
+
+	/*
+		 ** Check if the default country if available with the restricted ones
+	 */
+	private function _checkCurrentCountrie()
+	{
+		global $cookie;
+
+		if (!in_array(strtolower($this->_currentIsoCodeCountry), $this->limited_countries))
+		{
+			$query = '
+				SELECT c_l.name as name
+				FROM '._DB_PREFIX_.'country_lang as c_l
+				LEFT JOIN '._DB_PREFIX_.'country as c
+				ON c_l.id_country = c.id_country
+				WHERE c_l.id_lang = '.$cookie->id_lang.' 
+				AND c.iso_code IN ('; 
+			foreach($this->limited_countries as $iso)
+				$query .= "'".strtoupper($iso)."', ";
+			$query = rtrim($query, ', ').')';
+			$countriesName = Db::getInstance()->ExecuteS($query);
+			$htmlError = '
+				<div class="error">
+					<p>'.$this->l('Your default country is').' : '.Twenga::getCurrentCountryName().'</p>
+					<p>'.$this->l('Please select one of these available countries approved by Twenga').' :</p>
+					<ul>';
+			foreach($countriesName as $c)
+				$htmlError .= '<li>'.$c['name'].'</li>';
+			$url = Tools::getShopDomain(true).$_SERVER['PHP_SELF'].'?tab=AdminCountries&token='.
+				Tools::getAdminTokenLite('AdminCountries').'#Countries';
+			$htmlError .= '
+					</ul>
+					'.$this->l('Follow this link to change the country').
+					' : <a style="color:#0282dc;" href="'.$url.'">here</a>
+				</div>';
+			throw new Exception($htmlError);
+		}
+	}
+
 	public function getContent()
 	{
+		try {
+			$this->_checkCurrentCountrie();
+		}
+		catch (Exception $e)
+		{
+			return $e->getMessage();
+		}
 		// API can't be call if curl extension is not installed on PHP config.
 		if (!extension_loaded('curl'))
 		{
@@ -401,13 +596,15 @@ class Twenga extends PaymentModule
 			$this->_errors[] = $str_error;
 		}
 		
-		global $cookie;
-		$isoUser = strtolower(Language::getIsoById(intval($cookie->id_lang)));
-		if ($isoUser == 'fr' || $isoUser == 'de')
-			$tarifs_link = 'https://rts.twenga.com/media/prices_'.$isoUser.'.jpg';
-		else
+		$defaultIsoCountry = strtolower($this->_currentIsoCodeCountry);
+		if ($defaultIsoCountry == 'gb')
 			$tarifs_link = 'https://rts.twenga.com/media/prices_uk.jpg';
-
+		else
+			$tarifs_link = 'https://rts.twenga.com/media/prices_'.$defaultIsoCountry.'.jpg';
+		
+		global $cookie;
+		
+		$isoUser = strtolower(Language::getIsoById(intval($cookie->id_lang)));
 
 		$tarif_arr = array(950, 565);
 		if (file_exists($tarifs_link))
@@ -465,11 +662,12 @@ class Twenga extends PaymentModule
 	private function displayTwengaLogin()
 	{
 		global $cookie;
+
 		$isoUser = strtolower(Language::getIsoById(intval($cookie->id_lang)));
-		if ($isoUser == 'fr' || $isoUser == 'de')
-			$lost_link = 'https://rts.twenga.'.$isoUser.'/lost_password';
-		else
+		if ($isoUser == 'en')
 			$lost_link = 'https://rts.twenga.co.uk/lost_password';
+		else
+			$lost_link = 'https://rts.twenga.'.$isoUser.'/lost_password';
 
 		return '
 		<form name="form_set_hashkey" action="" method="post">	
@@ -673,7 +871,7 @@ class Twenga extends PaymentModule
 		
 		$result = Db::getInstance()->ExecuteS('
 		SELECT `id_product` FROM `'._DB_PREFIX_.'product` WHERE `active` = 1');
-
+		
 		foreach ($result AS $k => $row)
 		{
 			$product = new Product((int)$row['id_product']);

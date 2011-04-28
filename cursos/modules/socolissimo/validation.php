@@ -67,16 +67,16 @@ if (isset($return['SIGNATURE']) AND isset($return['CENAME']) AND isset($return['
 				}
 				else
 					echo '<div class="alert error"><img src="' . _PS_IMG_ . 'admin/forbbiden.gif" alt="nok" />&nbsp;'.$so->displaySoError('999').'
-						 <p><br/><a href="http://'.htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'order.php" class="button_small" title="Retour">« Retour</a></p></div>';
+						 <p><br/><a href="'.Tools::getProtocol(true).htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'order.php" class="button_small" title="Retour">« Retour</a></p></div>';
 			}
 			else
 				echo '<div class="alert error"><img src="' . _PS_IMG_ . 'admin/forbbiden.gif" alt="nok" />&nbsp;'.$so->displaySoError('999').'
-						 <p><br/><a href="http://'.htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'order.php" class="button_small" title="Retour">« Retour</a></p></div>';
+						 <p><br/><a href="'.Tools::getProtocol(true).htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'order.php" class="button_small" title="Retour">« Retour</a></p></div>';
 		}
 		else
 		{
 			echo '<div class="alert error"><img src="' . _PS_IMG_ . 'admin/forbbiden.gif" alt="nok" />&nbsp;'.$so->displaySoError('998').'
-				  <p><br/><a href="http://'.htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'order.php" class="button_small" title="Retour">« Retour</a></p></div>';
+				  <p><br/><a href="'.Tools::getProtocol(true).htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'order.php" class="button_small" title="Retour">« Retour</a></p></div>';
 		}
 	}
 	else
@@ -86,7 +86,7 @@ if (isset($return['SIGNATURE']) AND isset($return['CENAME']) AND isset($return['
 			 foreach($errors as $error)
 			 	echo $so->displaySoError(rtrim($error));	
 		echo '<p><br/>
-			 <a href="http://'.htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'order.php" class="button_small" title="Retour">« Retour
+			 <a href="'.Tools::getProtocol().htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'order.php" class="button_small" title="Retour">« Retour
 			 </a></p></div>';	}
 }
 else
@@ -125,7 +125,7 @@ function saveOrderShippingDetails($idCart, $idCustomer, $soParams)
 					'.(isset($soParams['PRTOWN']) ? '\''.pSQL($soParams['PRTOWN']).'\'' : '\'\'').',
 					'.(isset($soParams['CEPHONENUMBER']) ? '\''.pSQL($soParams['CEPHONENUMBER']).'\'' : '\'\'').',
 					'.(isset($soParams['CEEMAIL']) ? '\''.pSQL($soParams['CEEMAIL']).'\'' : '\'\'').',
-					'.(isset($soParams['TRADERCOMPANYNAME']) ? '\''.pSQL($soParams['TRADERCOMPANYNAME']).'\'' : '\'\'').',
+					'.(isset($soParams['CECOMPANYNAME']) ? '\''.pSQL($soParams['CECOMPANYNAME']).'\'' : '\'\'').',
 					'.(isset($soParams['CEDELIVERYINFORMATION']) ? '\''.pSQL($soParams['CEDELIVERYINFORMATION']).'\'' : '\'\'').',
 					'.(isset($soParams['CEDOORCODE1']) ? '\''.pSQL($soParams['CEDOORCODE1']).'\'' : '\'\'').',
 					'.(isset($soParams['CEDOORCODE2']) ? '\''.pSQL($soParams['CEDOORCODE2']).'\'' : '\'\'').')';
@@ -142,7 +142,7 @@ function saveOrderShippingDetails($idCart, $idCustomer, $soParams)
 					'.(isset($soParams['CETOWN']) ? '\''.pSQL($soParams['CETOWN']).'\'' : '\'\'').',
 					'.(isset($soParams['CEPHONENUMBER']) ? '\''.pSQL($soParams['CEPHONENUMBER']).'\'' : '\'\'').',
 					'.(isset($soParams['CEEMAIL']) ? '\''.pSQL($soParams['CEEMAIL']).'\'' : '\'\'').',
-					'.(isset($soParams['TRADERCOMPANYNAME']) ? '\''.pSQL($soParams['TRADERCOMPANYNAME']).'\'' : '\'\'').',
+					'.(isset($soParams['CECOMPANYNAME']) ? '\''.pSQL($soParams['CECOMPANYNAME']).'\'' : '\'\'').',
 					'.(isset($soParams['CEDELIVERYINFORMATION']) ? '\''.pSQL($soParams['CEDELIVERYINFORMATION']).'\'' : '\'\'').',
 					'.(isset($soParams['CEDOORCODE1']) ? '\''.pSQL($soParams['CEDOORCODE1']).'\'' : '\'\'').',
 					'.(isset($soParams['CEDOORCODE2']) ? '\''.pSQL($soParams['CEDOORCODE2']).'\'' : '\'\'').')';
@@ -173,7 +173,7 @@ function saveOrderShippingDetails($idCart, $idCustomer, $soParams)
 					(isset($soParams['CEDELIVERYINFORMATION']) ? $values['cedeliveryinformation'] = pSQL($soParams['CEDELIVERYINFORMATION']) : '');
 					(isset($soParams['CEDOORCODE1']) ? $values['cedoorcode1'] = pSQL($soParams['CEDOORCODE1']) : '');
 					(isset($soParams['CEDOORCODE2']) ? $values['cedoorcode2'] = pSQL($soParams['CEDOORCODE2']) : '');
-					(isset($soParams['TRADERCOMPANYNAME']) ? $values['cecompanyname'] = pSQL($soParams['TRADERCOMPANYNAME']) : '');
+					(isset($soParams['CECOMPANYNAME']) ? $values['cecompanyname'] = pSQL($soParams['CECOMPANYNAME']) : '');
 		}
 		else
 		{
@@ -191,7 +191,7 @@ function saveOrderShippingDetails($idCart, $idCustomer, $soParams)
 					(isset($soParams['CEDELIVERYINFORMATION']) ? $values['cedeliveryinformation'] = pSQL($soParams['CEDELIVERYINFORMATION']) : '');
 					(isset($soParams['CEDOORCODE1']) ? $values['cedoorcode1'] = pSQL($soParams['CEDOORCODE1']) : '');
 					(isset($soParams['CEDOORCODE2']) ? $values['cedoorcode2'] = pSQL($soParams['CEDOORCODE2']) : '');
-					(isset($soParams['TRADERCOMPANYNAME']) ? $values['cecompanyname'] = pSQL($soParams['TRADERCOMPANYNAME']) : '');
+					(isset($soParams['CECOMPANYNAME']) ? $values['cecompanyname'] = pSQL($soParams['CECOMPANYNAME']) : '');
 		}
 		$where = ' `id_cart` =\''.(int)($idCart).'\' AND `id_customer` =\''.(int)($idCustomer).'\'';
 				

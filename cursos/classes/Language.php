@@ -117,6 +117,14 @@ class LanguageCore extends ObjectModel
 	}
 
 
+	/**
+	 * This functions checks if every files exists for the language $iso_code. 
+	 * Concerned files are theses located in translations/$iso_code/ 
+	 * and translations/mails/$iso_code .
+	 * 
+	 * @param mixed $iso_code 
+	 * @returntrue if all files exists
+	 */
 	public static function checkFilesWithIsoCode($iso_code)
 	{
 		if (isset(self::$_checkedLangs[$iso_code]) AND self::$_checkedLangs[$iso_code])
@@ -261,22 +269,34 @@ class LanguageCore extends ObjectModel
 
 	public function loadUpdateSQL()
 	{
-		$file = _PS_TOOL_DIR_.'/languages/updateLanguages.sql';
-		if (!file_exists($file))
-			Tools::dieObject($file);
-		if (!$sqlContent = file_get_contents($file))
-			Tools::dieObject(file_get_contents($file));
-		$sqlContent .= "\n";
-		$sqlContent = str_replace('PREFIX_', _DB_PREFIX_, $sqlContent);
-		$sqlContent = preg_split("/;\s*[\r\n]+/", $sqlContent);
-		foreach ($sqlContent as $query)
+		$tables = Db::getInstance()->ExecuteS('SHOW TABLES LIKE \''._DB_PREFIX_.'%_lang\' ');
+		$langTables = array();
+		
+		foreach($tables as $table)
+			foreach($table as $t)
+				$langTables[] = $t;
+		
+		Db::getInstance()->Execute('SET @id_lang_default = (SELECT c.`value` FROM `'._DB_PREFIX_.'configuration` c WHERE c.`name` = \'PS_LANG_DEFAULT\' LIMIT 1)');
+		$return = true;
+		foreach($langTables as $name)
 		{
-			$query = trim($query);
-			if (!empty($query))
-				if (!Db::getInstance()->Execute($query))
-					Tools::dieObject($query);
+			$fields = '';
+			$columns = Db::getInstance()->ExecuteS('SHOW COLUMNS FROM `'.$name.'`');
+			foreach($columns as $column)
+				$fields .= $column['Field'].', ';
+			$fields = rtrim($fields, ', ');
+			$identifier = 'id_'.str_replace('_lang', '', str_replace(_DB_PREFIX_, '', $name));
+			
+			$sql = 'INSERT IGNORE INTO `'.$name.'` ('.$fields.') (SELECT ';
+			$sql .= '`'.$identifier.'`, `id_lang`, ';
+			foreach($columns as $column)
+				if ($identifier != $column['Field'] and $column['Field'] != 'id_lang')
+					$sql .= '(SELECT `'.$column['Field'].'` FROM `'.$name.'` tl WHERE tl.`id_lang` = @id_lang_default AND tl.`'.$identifier.'` = `'.str_replace('_lang', '', $name).'`.`'.$identifier.'`), ';
+				$sql = rtrim($sql, ', ');
+			$sql .= ' FROM `'._DB_PREFIX_.'lang` CROSS JOIN `'.str_replace('_lang', '', $name).'`) ;';
+			$return &= Db::getInstance()->Execute(pSQL($sql));
 		}
-		return true;
+		return $return;
 	}
 
 	public static function recurseDeleteDir($dir)
@@ -521,7 +541,7 @@ class LanguageCore extends ObjectModel
 				$lang->iso_code = $iso_code;
 				$lang->active = true;
 
-				if ($lang_pack = json_decode(Tools::file_get_contents('http://www.prestashop.com/download/lang_packs/get_language_pack.php?version='._PS_VERSION_.'&iso_lang='.$iso_code)))
+				if ($lang_pack = Tools::jsonDecode(Tools::file_get_contents('http://www.prestashop.com/download/lang_packs/get_language_pack.php?version='._PS_VERSION_.'&iso_lang='.$iso_code)))
 				{
 					if (isset($lang_pack->name)
 					&& isset($lang_pack->version)

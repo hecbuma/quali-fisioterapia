@@ -2,14 +2,19 @@
 {if isset($products)}
 
         <div class="wrapper">
+            <div class="curso-date">
 	{foreach from=$products item=product name=products}
-		{if $product.features}
-	        <div class="curso-date">
-		    <p>{$product.features.0.value}</p>
+
+		    {if $products[$smarty.foreach.products.index].features.0.value != $products[$smarty.foreach.products.index - 1].features.0.value}
+                        <p>{$product.features.0.value}</p>
+                    {/if}
 		    <p><span>Turma: {$product.features.1.value}</span><span>{$product.features.2.value}</span></p>
-		</div>
-                {/if}
+
+                    {if $products[$smarty.foreach.products.index].features.0.value != $products[$smarty.foreach.products.index + 1].features.0.value and !$smarty.foreach.products.last}
+                    </div><div class="curso-date">
+                    {/if}
 	{/foreach}
+            </div>
         </div>
                         <table border="0" >
 			  <caption>VALORES E CONDIÇÕES DE PAGAMENTO</caption>

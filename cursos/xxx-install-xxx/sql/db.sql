@@ -303,7 +303,7 @@ CREATE TABLE `PREFIX_connections` (
   `id_connections` int(10) unsigned NOT NULL auto_increment,
   `id_guest` int(10) unsigned NOT NULL,
   `id_page` int(10) unsigned NOT NULL,
-  `ip_address` int NULL DEFAULT NULL,
+  `ip_address` BIGINT NULL DEFAULT NULL,
   `date_add` datetime NOT NULL,
   `http_referer` varchar(255) default NULL,
   PRIMARY KEY  (`id_connections`),
@@ -361,6 +361,7 @@ CREATE TABLE `PREFIX_country` (
   `need_identification_number` tinyint(1) NOT NULL default '0',
   `need_zip_code` tinyint(1) NOT NULL default '1',
   `zip_code_format` varchar(12) NOT NULL default '',
+  `display_tax_label` BOOLEAN NOT NULL,
   PRIMARY KEY  (`id_country`),
   KEY `country_iso_code` (`iso_code`),
   KEY `country_` (`id_zone`)
@@ -371,13 +372,6 @@ CREATE TABLE `PREFIX_country_lang` (
   `id_lang` int(10) unsigned NOT NULL,
   `name` varchar(64) NOT NULL,
   UNIQUE KEY `country_lang_index` (`id_country`,`id_lang`)
-) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8;
-
-CREATE TABLE `PREFIX_country_tax` (
-  `id_country_tax` int(11) NOT NULL AUTO_INCREMENT,
-  `id_country` int(11) NOT NULL,
-  `id_tax_rules_group` int(11) NOT NULL,
-  PRIMARY KEY (`id_country_tax`)
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8;
 
 CREATE TABLE `PREFIX_currency` (
@@ -896,7 +890,7 @@ CREATE TABLE `PREFIX_order_detail` (
   `product_attribute_id` int(10) unsigned default NULL,
   `product_name` varchar(255) NOT NULL,
   `product_quantity` int(10) unsigned NOT NULL default '0',
-  `product_quantity_in_stock` int(10) unsigned NOT NULL default 0,
+  `product_quantity_in_stock` int(10) NOT NULL default 0,
   `product_quantity_refunded` int(10) unsigned NOT NULL default '0',
   `product_quantity_return` int(10) unsigned NOT NULL default '0',
   `product_quantity_reinjected` int(10) unsigned NOT NULL default 0,
@@ -1409,8 +1403,8 @@ CREATE TABLE `PREFIX_tab` (
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8;
 
 CREATE TABLE `PREFIX_tab_lang` (
-  `id_lang` int(10) unsigned NOT NULL,
   `id_tab` int(10) unsigned NOT NULL,
+  `id_lang` int(10) unsigned NOT NULL,
   `name` varchar(32) default NULL,
   PRIMARY KEY  (`id_tab`,`id_lang`)
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8;
@@ -1636,4 +1630,11 @@ CREATE TABLE `PREFIX_county_zip_code` (
 	`to_zip_code` INT NOT NULL ,
 	PRIMARY KEY ( `id_county` , `from_zip_code` , `to_zip_code` )
 ) ENGINE=ENGINE_TYPE  DEFAULT CHARSET=utf8;
+
+CREATE TABLE `PREFIX_address_format` (
+  `id_country` int(10) unsigned NOT NULL,
+  `format` varchar(255) NOT NULL DEFAULT '',
+  KEY `country` (`id_country`)
+) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8;
+
 

@@ -153,14 +153,22 @@ class AdminMeta extends AdminTab
 		{
 			$langs = Language::getLanguages(true);
 			$default_language = Configuration::get('PS_LANG_DEFAULT');
-			$defaultLangIsValidated = Validate::isLinkRewrite(Tools::getValue('url_rewrite_'.$default_language));
-			$englishLangIsValidated = Validate::isLinkRewrite(Tools::getValue('url_rewrite_1'));
+			if (Tools::getValue('page') != 'index')
+			{
+				$defaultLangIsValidated = Validate::isLinkRewrite(Tools::getValue('url_rewrite_'.$default_language));
+				$englishLangIsValidated = Validate::isLinkRewrite(Tools::getValue('url_rewrite_1'));
+			}
+			else
+			{	// index.php can have empty rewrite rule
+				$defaultLangIsValidated = !Tools::getValue('url_rewrite_'.$default_language) OR Validate::isLinkRewrite(Tools::getValue('url_rewrite_'.$default_language));
+				$englishLangIsValidated = !Tools::getValue('url_rewrite_1') OR Validate::isLinkRewrite(Tools::getValue('url_rewrite_1'));
+			}
 			if (!$defaultLangIsValidated AND !$englishLangIsValidated)
 			{
 				$this->_errors[] = Tools::displayError('Url rewrite field must be filled at least in default or english language.');
 				return false;
 			}
-			foreach($langs as $lang)
+			foreach ($langs as $lang)
 			{
 				$current = Tools::getValue('url_rewrite_'.$lang['id_lang']);
 				if (strlen($current) == 0)
@@ -180,6 +188,8 @@ class AdminMeta extends AdminTab
 			rewriteSettingsFile($baseUrls, NULL, NULL);
 			unset($this->_fieldsGeneral['__PS_BASE_URI__']);
 		}
+		if (Tools::isSubmit('submitOptions'.$this->table) OR Tools::isSubmit('submitAddmeta'))
+			Module::hookExec('afterSaveAdminMeta');
 		
 		return parent::postProcess();
 	}

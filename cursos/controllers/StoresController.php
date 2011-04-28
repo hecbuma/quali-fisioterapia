@@ -73,7 +73,7 @@ class StoresControllerCore extends FrontController
 					
 				$stores = Db::getInstance()->ExecuteS('
 				SELECT s.*, cl.name country, st.iso_code state,
-				('.(int)($multiplicator).' * acos(cos(radians('.(float)(Tools::getValue('latitude')).')) * cos(radians(latitude)) * cos(radians(longitude) - radians('.(float)(Tools::getValue('longitude')).')) + sin(radians('.(float)(Tools::getValue('latitude')).')) * sin(radians(latitude)))) distance
+				('.(int)($multiplicator).' * acos(cos(radians('.(float)(Tools::getValue('latitude')).')) * cos(radians(latitude)) * cos(radians(longitude) - radians('.(float)(Tools::getValue('longitude')).')) + sin(radians('.(float)(Tools::getValue('latitude')).')) * sin(radians(latitude)))) distance, cl.id_country id_country
 				FROM '._DB_PREFIX_.'store s
 				LEFT JOIN '._DB_PREFIX_.'country_lang cl ON (cl.id_country = s.id_country)
 				LEFT JOIN '._DB_PREFIX_.'state st ON (st.id_state = s.id_state)
@@ -91,7 +91,7 @@ class StoresControllerCore extends FrontController
 
 				$days[1] = 'Monday';
 				$days[2] = 'Tuesday';
-				$days[3] = 'Wenesday';
+				$days[3] = 'Wednesday';
 				$days[4] = 'Thursday';
 				$days[5] = 'Friday';
 				$days[6] = 'Saturday';
@@ -99,20 +99,28 @@ class StoresControllerCore extends FrontController
 				
 				foreach ($stores AS $store)
 				{
+					$days_datas = array();
 					$node = $dom->createElement('marker');
 					$newnode = $parnode->appendChild($node);
 					$newnode->setAttribute('name', $store['name']);
-					$address = $store['address1'].(!empty($store['address2']) ? '<br />'.$store['address2'] : '').'<br />'.$store['postcode'].' '.$store['city'].', '.$store['state'].'<br />'.$store['country'];
+					$address =  $this->_processStoreAddress($store);
+ 
 					$other = '';
 					if (!empty($store['hours']))
 					{
 						$hours = unserialize($store['hours']);
-						$other .= '<br /><br /><span style="font-weight: bold; text-decoration: underline; width: 80px; height: 15px; display: block;">Hours:</span>
-						<table style="font-size: 9px;">';
+
 						for ($i = 1; $i < 8; $i++)
-							$other .= '<tr><td style="width: 70px;">'.$days[$i].'</td><td>'.$hours[(int)($i) - 1].'</td></tr>';
-						$other .= '
-						</table>';
+						{
+							$hours_datas = array();
+							$hours_datas['day'] = $days[$i];
+							$hours_datas['hours'] = $hours[(int)($i) - 1];
+							$days_datas[] = $hours_datas;
+						}
+						$smarty->assign('days_datas', $days_datas);
+						$smarty->assign('id_country', $store['id_country']);
+					
+						$other .= self::$smarty->fetch(_PS_THEME_DIR_.'store_infos.tpl');
 					}
 					
 					$newnode->setAttribute('addressNoHtml', strip_tags(str_replace('<br />', ' ', $address)));
@@ -137,6 +145,42 @@ class StoresControllerCore extends FrontController
 		
 		$smarty->assign(array('distance_unit' => $distanceUnit, 'simplifiedStoresDiplay' => $simplifiedStoreLocator, 'stores' => $stores, 'mediumSize' => Image::getSize('medium')));
 	}
+
+	private function _processStoreAddress($store)
+	{
+		$ignore_field = array(
+					'firstname'	=>1
+					, 'lastname'	=>1
+				);
+
+		$out = '';
+		$out_datas = array();
+
+		$address_datas = AddressFormat::getOrderedAddressFields($store['id_country']);
+		
+		foreach ($address_datas as $data_line)
+		{
+			$data_fields = explode(' ', $data_line);
+			$adr_out = array();
+			
+			$data_fields_mod = false;
+			foreach ($data_fields as $field_item)
+			{
+				$field_item = trim($field_item);
+				if (!isset($ignore_field[$field_item])  && !empty($store[$field_item]) && $store[$field_item] != '')
+				{
+					$adr_out[] = $store[$field_item];
+					$data_fields_mod = true;
+				}
+			}
+			if ($data_fields_mod)
+				$out_datas[] = implode(' ', $adr_out);
+		}
+
+		$out = implode('<br />', $out_datas);
+		return $out;
+	}
+
 
 	public function process()
 	{

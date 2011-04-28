@@ -394,6 +394,8 @@ class AdminTranslations extends AdminTab
 	protected function findAndFillTranslations($files, $theme_name, $module_name, $dir = false, $iso_code = '')
 	{
 		global $_MODULES;
+		// added for compatibility
+		$_MODULES = array_change_key_case($_MODULES);
 		
 		// Default translations and Prestashop overriding themes are distinguish
 		$is_default = $theme_name === self::DEFAULT_THEME_NAME ? true : false;
@@ -418,12 +420,13 @@ class AdminTranslations extends AdminTab
 				
 				foreach ($matches[1] AS $key)
 				{
-					$module_key = ($is_default ? self::DEFAULT_THEME_NAME : '').'<{'.Tools::strtolower($module_name).'}'.($is_default ? 'prestashop' : $theme_name).'>'.Tools::strtolower($template_name).'_'.md5($key);
+					$module_key = ($is_default ? self::DEFAULT_THEME_NAME : '').'<{'.Tools::strtolower($module_name).'}'.strtolower($is_default ? 'prestashop' : $theme_name).'>'.Tools::strtolower($template_name).'_'.md5($key);
 					// to avoid duplicate entry
 					if (!in_array($module_key, $array_check_duplicate))
 					{
 						$array_check_duplicate[] = $module_key;
-						$this->modules_translations[($is_default ? self::DEFAULT_THEME_NAME : $theme_name)][$module_name][$template_name][$key] = key_exists($module_key, $_MODULES) ? html_entity_decode($_MODULES[$module_key], ENT_COMPAT, 'UTF-8') : '';
+						$this->modules_translations[strtolower($is_default ? self::DEFAULT_THEME_NAME : $theme_name)][$module_name][$template_name][$key]
+							 = key_exists($module_key, $_MODULES) ? html_entity_decode($_MODULES[$module_key], ENT_COMPAT, 'UTF-8') : '';
 						$this->total_expression++;
 					}
 				}
@@ -617,9 +620,6 @@ class AdminTranslations extends AdminTab
 			{
 				foreach ($mails as $mail_name=>$content)
 				{
-					// Magic Quotes shall... not.. PASS!
-					if (_PS_MAGIC_QUOTES_GPC_)
-						$content = array_map('stripslashes', $content);
 					
 					$module_name = false;
 					$module_name_pipe_pos = stripos($mail_name, '|');
@@ -641,6 +641,10 @@ class AdminTranslations extends AdminTab
 						}
 						$string_mail = $this->getMailPattern();
 						$content = str_replace(array('#title', '#content'), array($title, $content), $string_mail);
+
+						// Magic Quotes shall... not.. PASS!
+						if (_PS_MAGIC_QUOTES_GPC_)
+							$content = stripslashes($content);
 					}
 					if (Validate::isCleanHTML($content))
 					{
@@ -756,7 +760,7 @@ class AdminTranslations extends AdminTab
 				}
 			}
 			else
-				echo '<br /><br /><p class="error">'.$this->l('Cannot connect to prestashop.com to get languages list.').'</p>';
+				echo '<br /><br /><p class="error">'.$this->l('Cannot connect to prestashop.com to get languages list.').'</p></div>';
 			echo '	</div>
 			</fieldset>
 			</form><br />';
@@ -971,11 +975,11 @@ class AdminTranslations extends AdminTab
 		$str_output = '';
 		
 		/* List templates to parse */
-		$templates = scandir(_PS_THEME_DIR_);
+		$templates = array_merge(scandir(_PS_THEME_DIR_), scandir(_PS_ALL_THEMES_DIR_));
 		$count = 0;
 		$files = array();
 		foreach ($templates AS $template)
-			if (preg_match('/^(.*).tpl$/', $template) AND file_exists($tpl = _PS_THEME_DIR_.$template))
+			if (preg_match('/^(.*).tpl$/', $template) AND (file_exists($tpl = _PS_THEME_DIR_.$template) OR file_exists($tpl = _PS_ALL_THEMES_DIR_.$template)))
 			{
 				$template2 = substr(basename($template), 0, -4);
 				$newLang = array();
@@ -1677,18 +1681,18 @@ class AdminTranslations extends AdminTab
 		
 		if (Tools::file_exists_cache($directory.'/lang.php'))
 		{
-			if (($content = file_get_contents($directory.'/lang.php')))
+			// we need to include this even if already included
+			include($directory.'/lang.php');
+			foreach($_LANGMAIL as $key => $subject)
 			{
-				$content = str_replace("\n", " ", $content);
-				$content = str_replace("\\'", "\'", $content);
-				preg_match_all('/\$_LANGMAIL\[\'([^\']*)\'\] = \'([^;]*)\';/', $content, $matches);
-				for ($i = 0; isset($matches[1][$i]); $i++)
-				{
-					if (isset($matches[2][$i]))
-						$subject_mail_content[stripslashes($matches[1][$i])] = stripslashes($matches[2][$i]);
-				}
+				$subject = str_replace("\n", " ", $subject);
+				$subject = str_replace("\\'", "\'", $subject);
+
+				$subject_mail_content[$key] = htmlentities($subject,ENT_QUOTES,'UTF-8');
 			}
 		}
+		else
+			$this->_errors[] = $this->l('Subject mail translation file not found in').' '.$directory;
 		return $subject_mail_content;
 	}
 
@@ -1703,7 +1707,13 @@ class AdminTranslations extends AdminTab
 			fwrite($fd, "<?php\n\nglobal \$_".$tab.";\n\$_".$tab." = array();\n");
 
 			foreach($sub AS $key => $value)
-				fwrite($fd, '$_'.$tab.'[\''.pSQL($key, true).'\'] = \''.pSQL($value, true).'\';'."\n");
+			{
+				// Magic Quotes shall... not.. PASS!
+				if (_PS_MAGIC_QUOTES_GPC_)
+					$value = stripslashes($value);
+				fwrite($fd, '$_'.$tab.'[\''.pSQL($key).'\'] = \''.pSQL($value).'\';'."\n");
+			}
+
 			fwrite($fd, "\n?>");
 			fclose($fd);
 

@@ -32,6 +32,8 @@ class authorizeAIM extends PaymentModule
 		$this->name = 'authorizeaim';
 		$this->tab = 'payments_gateways';
 		$this->version = '1.0';
+		$this->author = 'PrestaShop';
+		$this->limited_countries = array('us');
 
         parent::__construct();
 
@@ -131,7 +133,7 @@ class authorizeAIM extends PaymentModule
 	{
 		global $smarty;
 
-		if (isset($_SERVER['HTTPS']) AND $_SERVER['HTTPS'] == 'on')
+		if (!empty($_SERVER['HTTPS']) AND strtolower($_SERVER['HTTPS']) != 'off' AND Configuration::get('PS_SSL_ENABLED'))
 		{
 			$invoiceAddress = new Address((int)$params['cart']->id_address_invoice);
 

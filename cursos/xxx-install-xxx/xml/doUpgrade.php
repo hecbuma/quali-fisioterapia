@@ -33,7 +33,8 @@ if (function_exists('date_default_timezone_set'))
 
 define('_PS_MODULE_DIR_', realpath(INSTALL_PATH).'/../modules/');
 define('_PS_INSTALLER_PHP_UPGRADE_DIR_', 'php/');
-
+// desactivate non-native module 
+require_once(_PS_INSTALLER_PHP_UPGRADE_DIR_.'desactivatecustommodules.php');
 // utf-8 conversion if needed (before v0.9.8.1 utf-8 was badly supported)
 require_once(_PS_INSTALLER_PHP_UPGRADE_DIR_.'utf8.php');
 // Configuration cleaner in order to get unique configuration names
@@ -86,14 +87,20 @@ require_once(_PS_INSTALLER_PHP_UPGRADE_DIR_.'generate_tax_rules.php');
 require_once(_PS_INSTALLER_PHP_UPGRADE_DIR_.'generate_ntree.php');
 // Before version 1.3.3 ecotax are not calculated into the price
 require_once(_PS_INSTALLER_PHP_UPGRADE_DIR_.'update_products_ecotax_v133.php');
+
 require_once(_PS_INSTALLER_PHP_UPGRADE_DIR_.'shop_url.php');
+
 require_once(_PS_INSTALLER_PHP_UPGRADE_DIR_.'gridextjs_deprecated.php');
 // generate level depth
 require_once(_PS_INSTALLER_PHP_UPGRADE_DIR_.'regenerate_level_depth.php');
 // add a new tab
 require_once(_PS_INSTALLER_PHP_UPGRADE_DIR_.'add_new_tab.php');
+
 require_once(_PS_INSTALLER_PHP_UPGRADE_DIR_.'add_module_to_hook.php');
+
 require_once(_PS_INSTALLER_PHP_UPGRADE_DIR_.'update_for_13version.php');
+
+require_once(_PS_INSTALLER_PHP_UPGRADE_DIR_.'alter_cms_block.php');
 
 //old version detection
 global $oldversion;
@@ -190,6 +197,9 @@ if(!defined('_MYSQL_ENGINE_'))
 	define('_MYSQL_ENGINE_', 'MyISAM');
 
 $sqlContent = '';
+if(isset($_GET['customModule']) AND $_GET['customModule'] == 'desactivate')
+	desactivate_custom_modules();
+
 foreach($neededUpgradeFiles AS $version)
 {
 	$file = INSTALL_PATH.'/sql/upgrade/'.$version.'.sql';

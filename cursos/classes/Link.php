@@ -42,6 +42,21 @@ class LinkCore
 	}
 
 	/**
+	 * This function returns a link to delete a customization picture file
+	 * 
+	 * @param mixed $product 
+	 * @param mixed $id_picture 
+	 * @return void
+	 */
+	public function getProductDeletePictureLink($product, $id_picture){
+		if (is_object($product))
+			return ($this->allow == 1)?(_PS_BASE_URL_.__PS_BASE_URI__.$this->getLangLink().((isset($product->category) AND !empty($product->category) AND $product->category != 'home') ? $product->category.'/' : '').(int)$product->id.'-'.$product->link_rewrite.($product->ean13 ? '-'.$product->ean13 : '').'.html?deletePicture='.$id_picture) :
+			(_PS_BASE_URL_.__PS_BASE_URI__.'product.php?id_product='.(int)$product->id).'&amp;deletePicture='.$id_picture;
+		else
+			return _PS_BASE_URL_.__PS_BASE_URI__.'product.php?id_product='.(int)$product.'&amp;deletePicture='.$id_picture;
+	}
+
+	/**
 	  * Return the correct link for product/category/supplier/manufacturer
 	  *
 	  * @param mixed $id_OBJ Can be either the object or the ID only
@@ -148,7 +163,7 @@ class LinkCore
 	
 	public function getMediaLink($filepath)
 	{
-		return 'http://'.Tools::getMediaServer($filepath).$filepath;
+		return Tools::getProtocol().Tools::getMediaServer($filepath).$filepath;
 	}
 
 	public function preloadPageLinks()
@@ -209,13 +224,14 @@ class LinkCore
 	}
 
 	/**
-	  * Create link after language change
+	  * Create link after language change, for the change language block
 	  *
 	  * @param integer $id_lang Language ID
 	  * @return string link
 	  */
 	public function getLanguageLink($id_lang)
 	{
+		global $cookie;
 		$matches = array();
 		$request = $_SERVER['REQUEST_URI'];
 		preg_match('#^/([a-z]{2})/([^\?]*).*$#', $request, $matches);
@@ -231,13 +247,20 @@ class LinkCore
 		parse_str($_SERVER['QUERY_STRING'], $queryTab);
 		unset($queryTab['isolang']);
 		$query = http_build_query($queryTab);
-		if (!empty($query))
+		
+		if (!empty($query) OR !$this->allow)
 			$query = '?'.$query;
 
-		if ($this->allow == 1)
-			return $this->getPageLink(substr($_SERVER['PHP_SELF'], strlen(__PS_BASE_URI__)), false, $id_lang).$query;
-		else
-			return $this->getUrlWith('id_lang', (int)($id_lang));
+		$switchLangLink = $this->getPageLink(substr($_SERVER['PHP_SELF'], strlen(__PS_BASE_URI__)), false, $id_lang).$query;
+		if (!$this->allow)
+			if ($id_lang != $cookie->id_lang)
+			{
+				if (strpos($switchLangLink,'id_lang'))
+					$switchLangLink = preg_replace('`id_lang=[0-9]*`','id_lang='.$id_lang,$switchLangLink);
+				else
+					$switchLangLink = $switchLangLink.'&amp;id_lang='.$id_lang;
+			}
+		return $switchLangLink;
 	}
 
 	/**
@@ -249,8 +272,17 @@ class LinkCore
 		return $this->getUrlWith('id_lang', (int)($id_lang));
 	}
 
+	/**
+	 * This function return the current url with a new parameter key=value
+	 * @param mixed $key 
+	 * @param mixed $val 
+	 * @return url with &key=val (or ?key=val)
+	 * @deprectated
+	 */
 	public function getUrlWith($key, $val)
 	{
+		// This function does not use rewrite
+		Tools::displayAsDeprecated();
 		$n = 0;
 		$url = str_replace('index.php', '', htmlentities($this->url, ENT_QUOTES, 'UTF-8'));
 

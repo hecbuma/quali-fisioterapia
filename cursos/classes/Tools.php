@@ -106,6 +106,16 @@ class ToolsCore
 	}
 
 	/**
+	 * getProtocol return the set protocol according to configuration (http[s])
+	 * @param Boolean true if require ssl
+	 * @return String (http|https)
+	 */
+	public static function getProtocol($use_ssl = null)
+	{
+		return (!is_null($use_ssl) && $use_ssl ? 'https://' : 'http://');
+	}
+
+	/**
 	 * getHttpHost return the <b>current</b> host used, with the protocol (http or https) if $http is true
 	 * This function should not be used to choose http or https domain name.
 	 * Use Tools::getShopDomain() or Tools::getShopDomainSsl instead
@@ -287,10 +297,10 @@ class ToolsCore
 					$cookie->id_currency = (int)($currency->id);
 			}
 
-		if ($cookie->id_currency)
+		if ((int)$cookie->id_currency)
 		{
-			$currency = Currency::getCurrencyInstance((int)($cookie->id_currency));
-			if (is_object($currency) AND $currency->id AND (int)($currency->deleted) != 1)
+			$currency = Currency::getCurrencyInstance((int)$cookie->id_currency);
+			if (is_object($currency) AND (int)$currency->id AND (int)$currency->deleted != 1 AND $currency->active)
 				return $currency;
 		}
 		$currency = Currency::getCurrencyInstance((int)(Configuration::get('PS_CURRENCY_DEFAULT')));
@@ -976,13 +986,13 @@ class ToolsCore
 		return strtolower($str);
 	}
 
-	static function strlen($str)
+	static function strlen($str, $encoding = 'UTF-8')
 	{
 		if (is_array($str))
 			return false;
 		$str = html_entity_decode($str, ENT_COMPAT, 'UTF-8');
 		if (function_exists('mb_strlen'))
-			return mb_strlen($str, 'utf-8');
+			return mb_strlen($str, $encoding);
 		return strlen($str);
 	}
 
@@ -1318,12 +1328,21 @@ class ToolsCore
 					unset($js_uri[$key]);
 
 		//overriding of modules js files
-		foreach ($js_uri AS &$file)
+		foreach ($js_uri AS $key => &$file)
 		{
 			$different = 0;
 			$override_path = str_replace(__PS_BASE_URI__.'modules/', _PS_ROOT_DIR_.'/themes/'._THEME_NAME_.'/js/modules/', $file, $different);
 			if ($different && file_exists($override_path))
 				$file = str_replace(__PS_BASE_URI__.'modules/', __PS_BASE_URI__.'themes/'._THEME_NAME_.'/js/modules/', $file, $different);
+			else
+			{
+				// remove PS_BASE_URI on _PS_ROOT_DIR_ for the following
+				$url_data = parse_url($file);
+				$file_uri = _PS_ROOT_DIR_.Tools::str_replace_once(__PS_BASE_URI__, DIRECTORY_SEPARATOR, $url_data['path']);
+				// check if js files exists
+				if (!file_exists($file_uri))
+					unset($js_uri[$key]);
+			}
 		}
 
 		// adding file to the big array...
@@ -1343,26 +1362,36 @@ class ToolsCore
 	{
 		global $css_files;
 
-		// avoid useless opération...
-		//if (is_array($css_files) && array_key_exists($css_uri, $css_files) && $css_files[$css_uri] == $css_media_type)
-		//	return true;
-
+		if (is_array($css_uri))
+		{
+			foreach ($css_uri as $file => $media_type)
+				Tools::addCSS($file, $media_type);
+			return true;
+		}
+		
 		//overriding of modules css files
 		$different = 0;
 		$override_path = str_replace(__PS_BASE_URI__.'modules/', _PS_ROOT_DIR_.'/themes/'._THEME_NAME_.'/css/modules/', $css_uri, $different);
 		if ($different && file_exists($override_path))
 			$css_uri = str_replace(__PS_BASE_URI__.'modules/', __PS_BASE_URI__.'themes/'._THEME_NAME_.'/css/modules/', $css_uri, $different);
+		else
+		{
+			// remove PS_BASE_URI on _PS_ROOT_DIR_ for the following
+			$url_data = parse_url($css_uri);
+			$file_uri = _PS_ROOT_DIR_.Tools::str_replace_once(__PS_BASE_URI__, DIRECTORY_SEPARATOR, $url_data['path']);
+			// check if css files exists
+			if (!file_exists($file_uri))
+				return true;
+		}
 
 		// detect mass add
-		if (!is_array($css_uri))
-			$css_uri = array($css_uri => $css_media_type);
+		$css_uri = array($css_uri => $css_media_type);
 
 		// adding file to the big array...
-		if(is_array($css_files))
+		if (is_array($css_files))
 			$css_files = array_merge($css_files, $css_uri);
 		else
 			$css_files = $css_uri;
-
 
 		return true;
 	}
@@ -1389,7 +1418,7 @@ class ToolsCore
 			$infos = array();
 			$infos['uri'] = $filename;
 			$url_data = parse_url($filename);
-			$infos['path'] = _PS_ROOT_DIR_.str_replace(__PS_BASE_URI__, '/', $url_data['path']);
+			$infos['path'] = _PS_ROOT_DIR_.Tools::str_replace_once(__PS_BASE_URI__, '/', $url_data['path']);
 			$css_files_by_media[$media]['files'][] = $infos;
 			if (!array_key_exists('date', $css_files_by_media[$media]))
 				$css_files_by_media[$media]['date'] = 0;
@@ -1474,7 +1503,7 @@ class ToolsCore
 				$infos = array();
 				$infos['uri'] = $filename;
 				$url_data = parse_url($filename);
-				$infos['path'] =_PS_ROOT_DIR_.str_replace(__PS_BASE_URI__, '/', $url_data['path']);
+				$infos['path'] =_PS_ROOT_DIR_.Tools::str_replace_once(__PS_BASE_URI__, '/', $url_data['path']);
 				$js_files_infos[] = $infos;
 	
 				$js_files_date = max(
@@ -1521,11 +1550,14 @@ class ToolsCore
 
 	public static function getMediaServer($filename)
 	{
-		$filename = mb_convert_encoding(md5(strtoupper($filename)),"UCS-4BE",'UTF-8');
+		if (function_exists('mb_convert_encoding'))
+			$filename = mb_convert_encoding(md5(strtoupper($filename)), "UCS-4BE", 'UTF-8');
+		else
+			$filename = iconv("UCS-4BE", 'UTF-8', md5(strtoupper($filename)));
 		$intvalue = 0;
-		for($i = 0; $i < mb_strlen($filename,"UCS-4BE"); $i++)
+		for($i = 0; $i < Tools::strlen($filename, 'UCS-4BE'); $i++)
 		{
-			$s2 = mb_substr($filename,$i,1,"UCS-4BE");
+			$s2 = Tools::substr($filename, $i, 1, 'UCS-4BE');
 			$val = unpack("N",$s2);
 			$intvalue += ($val[1]+$i)*2;
 		}
@@ -1579,8 +1611,8 @@ class ToolsCore
 			$tab['RewriteRule']['content']['^lang-([a-z]{2})/([a-zA-Z0-9-]*)/([0-9]+)\-([a-zA-Z0-9-]*)\.html'] = 'product.php?id_product=$3&isolang=$1 [QSA,L]';
 			$tab['RewriteRule']['content']['^lang-([a-z]{2})/([0-9]+)\-([a-zA-Z0-9-]*)\.html'] = 'product.php?id_product=$2&isolang=$1 [QSA,L]';
 			$tab['RewriteRule']['content']['^lang-([a-z]{2})/([0-9]+)\-([a-zA-Z0-9-]*)'] = 'category.php?id_category=$2&isolang=$1 [QSA,L]';
-			$tab['RewriteRule']['content']['^content/([0-9]+)\-([a-zA-Z0-9-]*)'] = 'cms.php?isolang=$1&id_cms=$2 [QSA,L]';
-			$tab['RewriteRule']['content']['^content/category/([0-9]+)\-([a-zA-Z0-9-]*)'] = 'cms.php?isolang=$1&id_cms_category=$2 [QSA,L]';
+			$tab['RewriteRule']['content']['^content/([0-9]+)\-([a-zA-Z0-9-]*)'] = 'cms.php?id_cms=$1 [QSA,L]';
+			$tab['RewriteRule']['content']['^content/category/([0-9]+)\-([a-zA-Z0-9-]*)'] = 'cms.php?id_cms_category=$1 [QSA,L]';
 		}
 
 		Language::loadLanguages();
@@ -1749,9 +1781,9 @@ FileETag INode MTime Size
 		{
 			$backtrace = debug_backtrace();
 			$callee = next($backtrace);
-			trigger_error('Function <strong>'.$callee['function'].'()</strong> is deprecated in <strong>'.$callee['file'].'</strong> on line <strong>'.$callee['Line'].'</strong><br />', E_USER_WARNING);
+			trigger_error('Function <strong>'.$callee['function'].'()</strong> is deprecated in <strong>'.$callee['file'].'</strong> on line <strong>'.$callee['line'].'</strong><br />', E_USER_WARNING);
 
-			$message = Tools::displayError('The function').' '.$callee['function'].' ('.Tools::displayError('Line').' '.$callee['Line'].') '.Tools::displayError('is deprecated and will be removed in the next major version.');
+			$message = Tools::displayError('The function').' '.$callee['function'].' ('.Tools::displayError('Line').' '.$callee['line'].') '.Tools::displayError('is deprecated and will be removed in the next major version.');
 
 			Logger::addLog($message, 3, $callee['class']);
 		}
@@ -1809,6 +1841,14 @@ FileETag INode MTime Size
 		foreach (array('?', '[', ']', '(', ')', '{', '}', '-', '.', '+', '*', '^', '$') as $char)
 			$s = str_replace($char, '\\'.$char, $s);
 		return $s;
+	}
+	
+	public static function str_replace_once($needle , $replace , $haystack)
+	{
+		$pos = strpos($haystack, $needle);
+		if ($pos === false)
+			return $haystack;
+		return substr_replace($haystack, $replace, $pos, strlen($needle));
 	}
 }
 

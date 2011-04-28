@@ -37,6 +37,7 @@ validShopInfos = false;
 upgradeCertify = false;
 dropdb=false;
 application="install";
+customModule="desactivate";
 
 function nextTab()
 {
@@ -838,7 +839,7 @@ function doUpgrade()
 	   url: "model.php",
 	   cache: false,
 	   data:
-	   	"method=doUpgrade"
+	   	"method=doUpgrade&customModule=" + customModule+ ""
 	   ,
 	   success: function(ret)
 	   {
@@ -910,10 +911,12 @@ $(document).ready(
 			}
 		);
 		$("#loader").ajaxComplete(
-			function()
+			function(e, xhr, settings)
 			{
 				$(this).fadeOut();
 				$(".lockedForAjax").removeAttr("disabled").removeClass("disabled").removeClass("lockedForAjax");
+				if (settings.url.substr(0, 17) == 'preactivation.php' && step == 1)
+					$("#btNext[disabled!=1], #btBack[disabled!=1]").attr("disabled", "disabled").addClass("disabled").addClass("lockedForAjax");
 			}
 		);
 		//set actions on clicks
@@ -1028,5 +1031,13 @@ $(document).ready(
 		$('#set_license').click(function() {
 			checkLicenseButton(this);
 		});
+		$("#customModuleDesactivation").bind('click',
+			function(){
+				if($("#customModuleDesactivation")[0].checked)
+					customModule = 'desactivate';
+				else
+					customModule = 'take the risk';
+			}
+		)
 	}
 );

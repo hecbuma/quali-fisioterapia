@@ -37,7 +37,7 @@ if (!isset($_SERVER['REQUEST_URI']) || $_SERVER['REQUEST_URI'] == '')
 if ($tmp = strpos($_SERVER['REQUEST_URI'], '?'))
 	$_SERVER['REQUEST_URI'] = substr($_SERVER['REQUEST_URI'], 0, $tmp);
 
-define('INSTALL_VERSION', '1.4.0.17');
+define('INSTALL_VERSION', '1.4.1.0');
 define('MINIMUM_VERSION_TO_UPDATE', '0.8.5');
 define('INSTALL_PATH', dirname(__FILE__));
 if (version_compare(phpversion(), '5.0.0', '<'))
@@ -97,7 +97,7 @@ if ($lm->getIncludeTradFilename())
 	<meta http-equiv="Pragma" content="no-cache" />
 	<meta http-equiv="Cache" content="no store" />
 	<meta http-equiv="Expires" content="-1" />
-	<title><?php echo lang('PrestaShop '.INSTALL_VERSION.' Installer')?></title>
+	<title><?php echo lang('PrestaShop '.INSTALL_VERSION.' Installer'); ?></title>
 	<link rel="stylesheet" type="text/css" media="all" href="view.css"/>
 	<script type="text/javascript" src="<?php echo PS_BASE_URI ?>js/jquery/jquery-1.4.4.min.js"></script>
 	<script type="text/javascript" src="<?php echo PS_BASE_URI ?>js/jquery/ajaxfileupload.js"></script>
@@ -578,11 +578,12 @@ if ($lm->getIncludeTradFilename())
 					.installModuleList.selected { display: block; }
 				</style>
 				<script>
+					var moduleChecked = new Array();
 					$(document).ready(function() {
 						$('#infosCountry').change(function() {
 							$(".installModuleList.selected").removeClass("selected");
-							if ($("#modulesList" + $('#infosCountry').val()))
-								$("#modulesList" + $('#infosCountry').val()).addClass("selected");
+							if ($("#modulesList" + $('select#infosCountry option:selected').attr('rel')))
+								$("#modulesList" + $('select#infosCountry option:selected').attr('rel')).addClass("selected");
 							$.ajax({
 								type: "GET",
 								url: "./php/country_to_timezone.php?country="+$("select#infosCountry option:selected").attr('rel'),
@@ -602,13 +603,13 @@ if ($lm->getIncludeTradFilename())
 					function getPreinstallXmlLang($object, $field)
 					{
 						if (property_exists($object, $field.'_'.((int)($_GET['language'])+1)))
-							return trim($object->{$field.'_'.((int)($_GET['language'])+1)});
+							return str_replace(array('!|', '|!'), array('<', '>'), trim($object->{$field.'_'.((int)($_GET['language'])+1)}));
 						if (property_exists($object, $field.'_1'))
-							return trim($object->{$field.'_1'});
+							return str_replace(array('!|', '|!'), array('<', '>'), trim($object->{$field.'_1'}));
 						return '';
 					}
 
-					$context = stream_context_create(array('http' => array('method'=>"GET", 'timeout' => 5)));
+					$context = stream_context_create(array('http' => array('method'=>"GET", 'timeout' => 3)));
 					$content = @file_get_contents('https://www.prestashop.com/partner/preactivation/partners.php?version=1.0', false, $context);
 					if ($content && $content[0] == '<')
 					{
@@ -617,37 +618,44 @@ if ($lm->getIncludeTradFilename())
 						{
 							$modulesHelpInstall = array();
 							$modulesDescription = array();
+							$modulesPrechecked = array();
 							foreach ($result->partner as $p)
 							{
-								$modulesDescription[trim($p->key)] = array('name' => trim($p->label), 'logo' => trim($p->logo), 'label' => getPreinstallXmlLang($p, 'label'), 'description' => getPreinstallXmlLang($p, 'description'));
-								foreach ($p->countries as $country)
-									$modulesHelpInstall[trim($country)][] = trim($p->key);
+								$modulesDescription[trim($p->key)] = array('name' => trim($p->label), 'logo' => trim($p->logo), 'label' => getPreinstallXmlLang($p, 'label'), 'description' => getPreinstallXmlLang($p, 'description').getPreinstallXmlLang($p, 'more'));
+								foreach ($p->country as $country_iso_code)
+									$modulesHelpInstall[trim($country_iso_code)][] = trim($p->key);
+								if ($p->prechecked)
+									foreach ($p->prechecked as $country_iso_code)
+										$modulesPrechecked[trim($p->key)][trim($country_iso_code)] = 1;
 							}
 
-							foreach ($modulesHelpInstall as $id_country => $modulesList)
+							foreach ($modulesHelpInstall as $country_iso_code => $modulesList)
 							{
-								echo '<div class="installModuleList'.($id_country == 8 ? ' selected' : '').'" id="modulesList'.$id_country.'">';
+								echo '<div class="installModuleList'.($country_iso_code == 'FR' ? ' selected' : '').'" id="modulesList'.$country_iso_code.'">';
 								foreach ($modulesList as $module)
 								{
 									echo '<div class="field">
-										<div style="float: left; height: 35px; width: 275px; padding-top: 6px;"><input type="checkbox" id="preInstallModules'.$id_country.$module.'" value="'.$module.'" class="aligned '.$module.' preInstallModules'.$id_country.'" style="vertical-align: middle;" /></div>
+										<div style="float: left; height: 35px; width: 275px; padding-top: 6px;"><input type="checkbox" id="preInstallModules_'.$country_iso_code.'_'.$module.'" value="'.$module.'" class="aligned '.$module.' preInstallModules_'.$country_iso_code.'" style="vertical-align: middle;" /></div>
 										<div style="float: left; height: 35px; width: 40px;"><img src="'.$modulesDescription[$module]['logo'].'" alt="'.$modulesDescription[$module]['name'].'" title="'.$modulesDescription[$module]['name'].'" /></div>
-										<div style="float: left; height: 35px; width: 300px;"><label for="preInstallModules'.$id_country.$module.'">'.$modulesDescription[$module]['label'].'</label></div>
+										<div style="float: left; height: 35px; width: 300px;"><label for="preInstallModules_'.$country_iso_code.'_'.$module.'">'.$modulesDescription[$module]['label'].'</label></div>
 										<br clear="left" />
 										<span id="resultInfosNotification" class="result aligned"></span>
 										<p class="userInfos aligned">'.$modulesDescription[$module]['description'].'</p>
-										<div id="'.$module.'FormDiv'.$id_country.'" style="display: none;"></div>
+										<div id="divForm_'.$country_iso_code.'_'.$module.'" style="display: none;"></div>
 									</div>';
 									echo "<script>
+										moduleChecked['".$country_iso_code.'_'.$module."'] = 0;
 										$(document).ready(function() {
-											$('#preInstallModules".$id_country.$module."').change(function() {
+											$('#preInstallModules_".$country_iso_code.'_'.$module."').change(function() {
+												var idDivForm = '#divForm_".$country_iso_code."_".$module."';
 												if ($(this).attr('checked'))
 												{
-													$('#".$module."FormDiv'+$('select#infosCountry option:selected').attr('value')).css({'display' : 'block'});
+													moduleChecked['".$country_iso_code.'_'.$module."'] = 1;
+													$(idDivForm).css({'display' : 'block'});
 													$.ajax({
 													  url: 'preactivation.php?request=form&partner=".$module."&language=".$_GET['language']."'+
 														'&language_iso_code='+isoCodeLocalLanguage+
-														'&country_iso_code='+encodeURIComponent($('select#infosCountry option:selected').attr('rel'))+
+														'&country_iso_code=".$country_iso_code."'+
 														'&activity='+ encodeURIComponent($('select#infosActivity').val())+
 														'&timezone='+ encodeURIComponent($('select#infosTimezone').val())+
 														'&shop='+ encodeURIComponent($('input#infosShop').val())+
@@ -655,18 +663,43 @@ if ($lm->getIncludeTradFilename())
 														'&lastName='+ encodeURIComponent($('input#infosName').val())+
 														'&email='+ encodeURIComponent($('input#infosEmail').val()),
 													  	success: function(data) {
-													    		$('#".$module."FormDiv'+$('select#infosCountry option:selected').attr('value')).html(data);
+													    		$(idDivForm).html(data);
 													  	}
 													});
 												}
 												else
 												{
-													$('#".$module."FormDiv'+$('select#infosCountry option:selected').attr('value')).css({'display' : 'none'});
-													$('#".$module."FormDiv'+$('select#infosCountry option:selected').attr('value')).html('');
+													moduleChecked['".$country_iso_code.'_'.$module."'] = 0;
+													$(idDivForm).css({'display' : 'none'});
+													$(idDivForm).html('');
 												}
 											});
 										});
-										</script>";
+										";
+										if (isset($modulesPrechecked[$module][$country_iso_code]) && $modulesPrechecked[$module][$country_iso_code] == 1)
+										{
+											echo "$(document).ready(function() {
+												moduleChecked['".$country_iso_code.'_'.$module."'] = 1;
+												$('#preInstallModules_".$country_iso_code."_".$module."').attr('checked', true);
+												$('#divForm_".$country_iso_code."_".$module."').css({'display' : 'block'});
+												$.ajax({
+												  url: 'preactivation.php?request=form&partner=".$module."&language=".$_GET['language']."'+
+													'&language_iso_code='+isoCodeLocalLanguage+
+													'&country_iso_code=".$country_iso_code."'+
+													'&activity='+ encodeURIComponent($('select#infosActivity').val())+
+													'&timezone='+ encodeURIComponent($('select#infosTimezone').val())+
+													'&shop='+ encodeURIComponent($('input#infosShop').val())+
+													'&firstName='+ encodeURIComponent($('input#infosFirstname').val())+
+													'&lastName='+ encodeURIComponent($('input#infosName').val())+
+													'&email='+ encodeURIComponent($('input#infosEmail').val()),
+												  	success: function(data) {
+												    		$('#divForm_".$country_iso_code."_".$module."').html(data);
+												  	}
+												});
+											});";
+										}
+
+										echo "</script>";
 								}
 								echo '</div>';
 							}
@@ -751,7 +784,7 @@ if ($lm->getIncludeTradFilename())
 						<td id="endEmail" class="resultEnd">&nbsp;</td>
 					</tr>
 				</table>
-				<h3><?php echo lang('WARNING: For more security, you must delete the \'install\' folder and readme files (readme_fr.txt, readme_en.txt, readme_es.txt).'); ?></h3>
+				<h3><?php echo lang('WARNING: For more security, you must delete the \'install\' folder and readme files (readme_fr.txt, readme_en.txt, readme_es.txt, readme_de.txt, readme_it.txt, CHANGELOG).'); ?></h3>
 
 				<a href="../admin" id="access" class="BO" target="_blank">
 					<span class="title"><?php echo lang('Back Office'); ?></span>
@@ -793,9 +826,42 @@ if ($lm->getIncludeTradFilename())
 				{
 					return strnatcmp($a['version'], $b['version']);
 				}
+				$countNonNative = 0;
+				if ($oldversion !== false AND !$sameVersions)
+				{
+					include_once(realpath(INSTALL_PATH.'/../config').'/defines.inc.php');
+					$moduleList = Module::getNonNativeModuleList();
+					$moduleNonNativeLi = '<ul>';
+					foreach($moduleList as $module)
+						if($module['active'])
+						{
+							$countNonNative++;
+							$moduleNonNativeLi .= '<li>'.$module['name'].'</li>';
+						}
+					$moduleNonNativeLi .= '</ul>';	
+				}
+				if($countNonNative)
+				{
+					echo '<br /><br />
+					<h2>'.lang('Module compatibility').'</h2>';
+					echo '<div style="font-weight: bold; background-color: #ffdeb7; color: #000; padding: 10px; border: 1px solid #999; margin-top: 10px;">
+					<p><img src="../img/admin/warning.gif" alt="" style="vertical-align: middle;" /> '.lang('It\'s dangerous to keep non-native modules activated during the update. If you really want to take this risk, uncheck the following box.').'</p>
+					</div>
+					<p>'.lang('You will be able to manually reactivate them in your back-office, once the update process has succeeded.').'</p>
+					<input id="customModuleDesactivation" type="checkbox" checked="checked" value="1" name="customModuleDesactivation" /> <label for="customModuleDesactivation">'
+					.lang('Ok, please desactivate the following modules, I will reactivate them later.').' : </label>';
+					echo $moduleNonNativeLi;
+	
+				}
+
+				echo '<h2>'.lang('Theme compatibility').'</h2>';
+				echo '<p>'.lang('Before updating, you need to check that your theme is compatible with version').' <b>'.INSTALL_VERSION.'</b> '.lang('of PrestaShop.').'</p>
+	<p><b>'.lang('In this aim, use our').'</b> <a target="_blank" href="http://validator.prestashop.com?version='.INSTALL_VERSION.'" title="'.lang('Link to the validator').'"><b>'.lang('Online Theme Validator').'</b></a>.'.'</p>';
+	echo '<p>'.lang('If your theme is not valid, you may experience some problems in your front-office aspect, but don\'t panic ! To solve this, you can make it compatible by correcting the validators errors or by using a theme compatible with ').' '.INSTALL_VERSION.' '.lang('version').'.</p>';
 				
-				echo '<br /><br />
-				<h2>'.lang('Details about this upgrade').' (v'.INSTALL_VERSION.')</h2>
+				echo '<h2>'.lang('Let\'s go!').'</h2>
+				<p>'.lang('Click on the "Next" button to start the upgrade, this can take several minutes,').' <u style="font-weight: bold; text-decoration: underline;">'.lang('do not close the window and be patient.').'</u></p>';
+				echo '<h2>'.lang('Details about this upgrade').' (v'.INSTALL_VERSION.')</h2>
 				<p>'.
 				lang('Thank you, you will be able to continue the upgrade process by clicking on the "Next" button.').'<br /><br />'.
 				lang('PrestaShop is upgrading your shop one version after the other, the following upgrade files will be processed:').'
@@ -810,7 +876,7 @@ if ($lm->getIncludeTradFilename())
 						if ($file != '.' AND $file != '..')
 						{
 							$version = str_replace('.sql', '', $file);							
-							if (version_compare($version, _PS_VERSION_) == 1 AND version_compare(INSTALL_VERSION, $version) != -1)
+							if (version_compare($version, $oldversion) == 1 AND version_compare(INSTALL_VERSION, $version) != -1)
 							{
 								$major = false;
 								if (in_array($version, array('0.9.7.2', '1.0.0.8', '1.1.0.5', '1.2.5.0', '1.3.0.10', '1.4.0.17')))
@@ -905,10 +971,8 @@ if ($lm->getIncludeTradFilename())
 					echo '<img src="../img/admin/error2.png" alt="" style="vertical-align: middle;" /> '.lang('We strongly recommend that you inform your hosting provider to modify the settings before process to the update.');
 					
 				echo '
-				</div><br />
+				</div><br />';
 				
-				<h2>'.lang('Let\'s go!').'</h2>
-				<p>'.lang('Click on the "Next" button to start the upgrade, this can take several minutes,').' <u style="font-weight: bold; text-decoration: underline;">'.lang('do not close the window and be patient.').'</u></p>';
 				
 				?>
 			</div>
@@ -995,7 +1059,7 @@ if ($lm->getIncludeTradFilename())
 
 				?>
 				
-				<h3 style="margin-top: 15px;"><?php echo lang('WARNING: For more security, you must delete the \'install\' folder and readme files (readme_fr.txt, readme_en.txt, readme_es.txt).'); ?></h3>
+				<h3 style="margin-top: 15px;"><?php echo lang('WARNING: For more security, you must delete the \'install\' folder and readme files (readme_fr.txt, readme_en.txt, readme_es.txt, readme_de.txt, readme_it.txt, CHANGELOG).'); ?></h3>
 				<a href="../" id="access_update" target="_blank">
 					<span class="title"><?php echo lang('Front Office'); ?></span>
 					<span class="description"><?php echo lang('Find your store as your future customers will see!'); ?></span>

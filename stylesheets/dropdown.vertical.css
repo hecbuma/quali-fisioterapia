@@ -13,12 +13,12 @@
 @import "dropdown.css";
 
 ul.dropdown.vertical {
- width: 130px;
+ width: 140px;
 }
 
 ul.dropdown.vertical ul {
  top: 2px;
- left: 100%;
+ left: 90%;
   background-color: rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.2);
   width: 160px;
@@ -41,7 +41,7 @@ ul.dropdown.vertical > li :hover ul  li{
  margin-top:2px;
 }
 ul.dropdown.vertical ul  li a{
- width:120px;
+ width:140px;
  text-align:left;
  text-decoration:none;
  font-weight:bold;

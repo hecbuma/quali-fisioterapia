@@ -47,6 +47,16 @@ class Hipay extends PaymentModule
 		$this->displayName = $this->l('Hipay');
 		$this->description = $this->l('Secure payement Visa Mastercard and european solutions.');
 
+		$result = Db::getInstance()->ExecuteS('
+			SELECT iso_code
+			FROM '._DB_PREFIX_.'country as c
+			LEFT JOIN '._DB_PREFIX_.'zone as z
+			ON z.id_zone = c.id_zone
+			WHERE z.id_zone = 1');
+
+		foreach ($result as $num => $iso)
+			$this->limited_countries[] = $iso['iso_code'];
+		
 		if ($this->id)
 		{
 			$this->prod = (int)Tools::getValue('HIPAY_PROD', Configuration::get('HIPAY_PROD'));
@@ -59,13 +69,23 @@ class Hipay extends PaymentModule
 	public function	install()
 	{
 		Configuration::updateValue('HIPAY_SALT', uniqid());
-		Configuration::updateValue('HIPAY_PROD', Configuration::get('HIPAY_PROD'));
+		// Force using Prod mod	
+		Configuration::updateValue('HIPAY_PROD', 1);
+
 		if (!Configuration::get('HIPAY_UNIQID'))
 			Configuration::updateValue('HIPAY_UNIQID', uniqid());
 		if (!Configuration::get('HIPAY_RATING'))
 			Configuration::updateValue('HIPAY_RATING', 'ALL');
 		
-		return (parent::install() AND $this->registerHook('payment'));
+		if (!(parent::install() AND $this->registerHook('payment')))
+			return false;
+		// Check only the European country for the country restrictions
+		Db::getInstance()->Execute('
+			DELETE FROM '._DB_PREFIX_.'module_country 
+			WHERE id_module = '.$this->id.' 
+			AND id_country NOT IN 
+			(SELECT id_country FROM '._DB_PREFIX_.'country WHERE id_zone = 1)');
+		return true;
 	}
 
 	public function hookPayment($params)
@@ -305,40 +325,67 @@ class Hipay extends PaymentModule
 		<style>
 			.hipay_label {float:none;font-weight:normal;padding:0;text-align:left;width:100%;line-height:30px}
 			.hipay_help {vertical-align:middle}
-			#hipay_table {border:1px solid #383838}
-			#hipay_table td {border:1px solid #383838}
+			#hipay_table {border:1px solid #383838;}
+			#hipay_table td {border:1px solid #383838; width:250px; padding-left;8px; text-align:center;}
 			#hipay_table td.hipay_end {border-top:none}
 			#hipay_table td.hipay_block {border-bottom:none}
+			#hipay_steps_infos {border:none; margin-bottom:20px;}
+			#hipay_steps_infos td {border:none; width:70px; height:60px;padding-left;8px; text-align:left;}
+			#hipay_steps_infos td.tab2 {border:none; width:700px;; height:60px;padding-left;8px; text-align:left;}
+			#hipay_steps_infos td.hipay_end {border-top:none}
+			#hipay_steps_infos td.hipay_block {border-bottom:none}
+
 		</style>
-		<fieldset><legend><img src="../modules/'.$this->name.'/logo.gif" /> '.$this->l('Hipay').'</legend>
-			'.$this->l('Hipay is a secure electronic wallet which provides merchants a complete service package for online business transactions (for digital contents, software, music, subscriptions, physical goods, etc.) without having to negotiate with a bank and without technical charges.rn').'<br />'.$this->l('Free & easy to use, Hipay implementation is a real asset to an e-commerce website that wants to expand in Europe. It provides secure payments by international cards, local payment solutions, bank transfers and more.').'
-			<br /><br />
-			'.(Configuration::get('HIPAY_SITEID')
-				? '<a href="https://www.hipay.com/auth" style="color:#D9263F;font-weight:700">'.$this->l('Log in to your merchant account').'</a><br />'
-				: '<a href="https://www.hipay.com/registration/register" style="color:#D9263F;font-weight:700"><img src="../modules/'.$this->name.'/create.jpg" alt="'.$this->l('Create a Hipay account').'" title="'.$this->l('Create a Hipay account').'" border="0" /></a><br />').'
-			<br />'.$this->l('Notice: if you want to refund a payment, please log in to your Hipay account then go to Merchant Management > Sales management.').'
+    <fieldset><legend><img src="../modules/'.$this->name.'/logo.gif" /> '.$this->l('Hipay').'</legend>
+    '.$this->l('Hipay is a secure electronic wallet which has the European Bank approval. Hipay offer you many opportunities without need to negotiate with a bank. Easy and free to use, Hipay\'s solution of the implementation is a real asset for an e-commerce website that wants to expand in Europe: secure payment by international card, local payment solutions, bank transfers...').'
+			<br />
+			<!-- <br />'.$this->l('Notice: if you want to refund a payment, please log in to your Hipay account then go to Merchant Management > Sales management.').'-->
 		</fieldset>
 		<div class="clear">&nbsp;</div>
 		<fieldset><legend><img src="../modules/'.$this->name.'/logo.gif" /> '.$this->l('Configuration').'</legend>
-			<form action="'.$link.'" method="post">
-				<table id="hipay_table" cellspacing="0" cellpadding="0">
-					<tr style="height:40px">
+		'.$this->l('The configuration of Hipay is really easy and runs into 3 steps').'<br /><br />
+		<table id="hipay_steps_infos" cellspacing="0" cellpadding="0">
+			<tr>
+				<td><img src="../modules/'.$this->name.'/1.png" alt="step 1" /></td>
+				<td class="tab2">'.(Configuration::get('HIPAY_SITEID')
+					? '<a href="https://www.hipay.com/auth" style="color:#D9263F;font-weight:700">'.$this->l('Log in to your merchant account').'</a><br />'
+					: '<a href="https://www.hipay.com/registration/register" style="color:#D9263F;font-weight:700"><img src="../modules/'.$this->name.'/create.jpg" alt="'.$this->l('Create a Hipay account').'" title="'.$this->l('Create a Hipay account').'" border="0" /></a><br />').'
+				</td>
+			</tr>
+			<tr>
+				<td><img src="../modules/'.$this->name.'/2.png" alt="step 2" /></td>
+				<td class="tab2">'.$this->l('Active theHipay solution in you Prestashop, it\'s free !').'</td>
+			</tr>
+			<tr>
+				<td><img src="../modules/'.$this->name.'/3.png" alt="step 3" /></td> 
+				<td class="tab2">'.$this->l('Enjoy preferred pricing on transactions via Prestashop by').' 
+				<a style="color:blue; text-decoration:underline;" href="mailto:commercial@hipay.com">'
+				.$this->l('contacting our sales department').'</a></td>
+			</tr>
+		</table>	
+		<form action="'.$link.'" method="post">
+		<table id="hipay_table" cellspacing="0" cellpadding="0">
+			<tr>
+				<td style="">&nbsp;</td>	
+				<td style="height:40px;">Compte Hipay</td>
+			</tr>';
+					/*<tr style="height:40px">
 						<td style="padding-left:20px"><b>'.$this->l('Account').'</b></td>
 						<td class="hipay_prod" style="width:250px;padding-left:8px">
 							<input type="radio" name="HIPAY_PROD" value="1" '.((int)$this->prod ? 'checked="checked"' : '').'
 								onclick="switchHipayAccount(1);" />
 							<span class="hipay_prod_span">'.$this->l('real / production').'</span>
-						</td>
-						<td class="hipay_test" style="width:250px;padding-left:8px">
+						</td>';
+						/*<td class="hipay_test" style="width:250px;padding-left:8px">
 							<input type="radio" name="HIPAY_PROD" value="0" '.((int)$this->prod ? '' : 'checked="checked"').'
 								onclick="switchHipayAccount(0);" />
 								<span class="hipay_test_span">'.$this->l('sandbox / test').'</span><br />
-						</td>
-					</tr>';
+								</td>
+		$form .= '</tr>';*/
 		foreach ($currencies as $currency)
 		{
 			$form .= '<tr>
-						<td style="width:200px;padding-left:20px" class="hipay_block"><b>'.$this->l('Configuration in').' '.$currency['name'].' '.$currency['sign'].'</b></td>
+						<td class="hipay_block"><b>'.$this->l('Configuration in').' '.$currency['name'].' '.$currency['sign'].'</b></td>
 						<td class="hipay_prod hipay_block" style="padding-left:10px">
 							<label class="hipay_label" for="HIPAY_ACCOUNT_'.$currency['iso_code'].'">'.$this->l('Account number').' <a href="../modules/'.$this->name.'/screenshots/accountnumber.png" target="_blank"><img src="../modules/'.$this->name.'/help.png" class="hipay_help" /></a></label><br />
 							<input type="text" id="HIPAY_ACCOUNT_'.$currency['iso_code'].'" name="HIPAY_ACCOUNT_'.$currency['iso_code'].'" value="'.Tools::getValue('HIPAY_ACCOUNT_'.$currency['iso_code'], Configuration::get('HIPAY_ACCOUNT_'.$currency['iso_code'])).'" /><br />
@@ -354,14 +401,14 @@ class Hipay extends PaymentModule
 					$form.= '	<option value="'.(int)$id.'" '.(Tools::getValue('HIPAY_CATEGORY_'.$currency['iso_code'], Configuration::get('HIPAY_CATEGORY_'.$currency['iso_code'])) == $id ? 'selected="selected"' : '').'>'.htmlentities($name, ENT_COMPAT, 'UTF-8').'</option>';
 				$form .= '	</select><br />';
 			}
-			$form .= '	</td>
+/*			$form .= '	</td>
 						<td class="hipay_test hipay_block" style="padding-left:10px">
 							<label class="hipay_label" for="HIPAY_ACCOUNT_TEST_'.$currency['iso_code'].'">'.$this->l('Test account number').' <a href="../modules/'.$this->name.'/screenshots/accountnumber.png" target="_blank"><img src="../modules/'.$this->name.'/help.png" class="hipay_help" /></a></label><br />
 							<input type="text" id="HIPAY_ACCOUNT_TEST_'.$currency['iso_code'].'" name="HIPAY_ACCOUNT_TEST_'.$currency['iso_code'].'" value="'.Tools::getValue('HIPAY_ACCOUNT_TEST_'.$currency['iso_code'], Configuration::get('HIPAY_ACCOUNT_TEST_'.$currency['iso_code'])).'" /><br />
 							<label class="hipay_label" for="HIPAY_PASSWORD_TEST_'.$currency['iso_code'].'">'.$this->l('Merchant password').' <a href="../modules/'.$this->name.'/screenshots/merchantpassword.png" target="_blank"><img src="../modules/'.$this->name.'/help.png" class="hipay_help" /></a></label><br />
 							<input type="text" id="HIPAY_PASSWORD_TEST_'.$currency['iso_code'].'" name="HIPAY_PASSWORD_TEST_'.$currency['iso_code'].'" value="'.Tools::getValue('HIPAY_PASSWORD_TEST_'.$currency['iso_code'], Configuration::get('HIPAY_PASSWORD_TEST_'.$currency['iso_code'])).'" /><br />
 							<label class="hipay_label" for="HIPAY_SITEID_TEST_'.$currency['iso_code'].'">'.$this->l('Site ID').' <a href="../modules/'.$this->name.'/screenshots/siteid.png" target="_blank"><img src="../modules/'.$this->name.'/help.png" class="hipay_help" /></a></label><br />
-							<input type="text" id="HIPAY_SITEID_TEST_'.$currency['iso_code'].'" name="HIPAY_SITEID_TEST_'.$currency['iso_code'].'" value="'.Tools::getValue('HIPAY_SITEID_TEST_'.$currency['iso_code'], Configuration::get('HIPAY_SITEID_TEST_'.$currency['iso_code'])).'" /><br />';
+							<input type="text" id="HIPAY_SITEID_TEST_'.$currency['iso_code'].'" name="HIPAY_SITEID_TEST_'.$currency['iso_code'].'" value="'.Tools::getValue('HIPAY_SITEID_TEST_'.$currency['iso_code'], Configuration::get('HIPAY_SITEID_TEST_'.$currency['iso_code'])).'" /><br />';*/
 			if ($ping AND $hipaySiteId = (int)Configuration::get('HIPAY_SITEID_TEST_'.$currency['iso_code']) AND $hipayAccountIdTest = (int)Configuration::get('HIPAY_ACCOUNT_TEST_'.$currency['iso_code']))
 			{
 				$form .= '	<label for="HIPAY_CATEGORY_TEST_'.$currency['iso_code'].'" class="hipay_label">'.$this->l('Category').'</label><br />
@@ -372,7 +419,9 @@ class Hipay extends PaymentModule
 			}
 			$form .= '	</td>
 					</tr>
-					<tr><td class="hipay_end">&nbsp;</td><td class="hipay_prod hipay_end">&nbsp;</td><td class="hipay_test hipay_end">&nbsp;</td></tr>';
+					<tr><td class="hipay_end">&nbsp;</td><td class="hipay_prod hipay_end">&nbsp;</td>';
+			/*<td class="hipay_test hipay_end">&nbsp;</td>*/
+			$form .= '</tr>';
 		}
 		$form .= '</table>
 				<hr class="clear" />

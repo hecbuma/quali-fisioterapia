@@ -67,7 +67,7 @@ class ProductControllerCore extends FrontController
 			if (Validate::isLoadedObject($this->product))
 			{
 				$canonicalURL = self::$link->getProductLink($this->product);
-				if (!preg_match('/^'.Tools::pRegexp($canonicalURL, '/').'([&?].*)?$/', 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']))
+				if (!preg_match('/^'.Tools::pRegexp($canonicalURL, '/').'([&?].*)?$/', Tools::getProtocol().$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']))
 				{
 					header('HTTP/1.0 301 Moved');
 					if (defined('_PS_MODE_DEV_') AND _PS_MODE_DEV_)
@@ -328,7 +328,7 @@ class ProductControllerCore extends FrontController
 				));
 
 				// Pack management
-				self::$smarty->assign('packItems', Pack::getItemTable($this->product->id, (int)(self::$cookie->id_lang), true));
+				self::$smarty->assign('packItems', $this->product->cache_is_pack ? Pack::getItemTable($this->product->id, (int)(self::$cookie->id_lang), true) : array());
 				self::$smarty->assign('packs', Pack::getPacksTable($this->product->id, (int)(self::$cookie->id_lang), true, 1));
 			}
 		}
@@ -376,7 +376,8 @@ class ProductControllerCore extends FrontController
 				$fileName = md5(uniqid(rand(), true));
 				if ($error = checkImage($file, (int)(Configuration::get('PS_PRODUCT_PICTURE_MAX_SIZE'))))
 					$this->errors[] = $error;
-				if (!$tmpName = tempnam(_PS_TMP_IMG_DIR_, 'PS') OR !move_uploaded_file($file['tmp_name'], $tmpName))
+
+				if ($error OR (!$tmpName = tempnam(_PS_TMP_IMG_DIR_, 'PS') OR !move_uploaded_file($file['tmp_name'], $tmpName)))
 					return false;
 				/* Original file */
 				elseif (!imageResize($tmpName, _PS_UPLOAD_DIR_.$fileName))

@@ -37,7 +37,7 @@ section.cursos-secondary h2 {
 section.cursos-secondary ul.dropdown li {
 	background-color: orange;
 	background-image:url('../images/side-btn-bk.png');
-	background-position: -60px 0;
+	background-position: -40px 0;
 }
 
 section.cursos-secondary ul.dropdown li:hover {

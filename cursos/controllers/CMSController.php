@@ -35,13 +35,13 @@ class CmsControllerCore extends FrontController
 	{
 		if ($id_cms = (int)Tools::getValue('id_cms'))
 		    $this->cms = new CMS($id_cms, self::$cookie->id_lang); 
-		if ($id_cms_category = (int)Tools::getValue('id_cms_category'))
+		elseif ($id_cms_category = (int)Tools::getValue('id_cms_category'))
 		    $this->cms_category = new CMSCategory($id_cms_category, self::$cookie->id_lang); 
 			
 		// Automatically redirect to the canonical URL if the current in is the right one
 		// $_SERVER['HTTP_HOST'] must be replaced by the real canonical domain
 		if ($this->cms AND $canonicalURL = self::$link->getCMSLink($this->cms))
-			if (!preg_match('/^'.Tools::pRegexp($canonicalURL, '/').'([&?].*)?$/', 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']))
+			if (!preg_match('/^'.Tools::pRegexp($canonicalURL, '/').'([&?].*)?$/', Tools::getProtocol().$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']))
 			{
 				header('HTTP/1.0 301 Moved');
 				if (defined(_PS_MODE_DEV_) AND _PS_MODE_DEV_ )
@@ -49,7 +49,7 @@ class CmsControllerCore extends FrontController
 				Tools::redirectLink($canonicalURL);
 			}
 		if ($this->cms_category AND $canonicalURL = self::$link->getCMSCategoryLink($this->cms_category))
-			if (!preg_match('/^'.Tools::pRegexp($canonicalURL, '/').'([&?].*)?$/', 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']))
+			if (!preg_match('/^'.Tools::pRegexp($canonicalURL, '/').'([&?].*)?$/', Tools::getProtocol().$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']))
 			{
 				header('HTTP/1.0 301 Moved');
 				if (_PS_MODE_DEV_ )
@@ -78,7 +78,6 @@ class CmsControllerCore extends FrontController
     		        self::$link->getCMSCategoryLink($id_cms_category, $infos['link_rewrite'], $infos['id_lang']);
     			$default_rewrite[$infos['id_lang']] = $arr_link;
     		}
-		
 		    self::$smarty->assign('lang_rewrite_urls', $default_rewrite);
 		}
 	}

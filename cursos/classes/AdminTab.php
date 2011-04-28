@@ -178,17 +178,35 @@ abstract class AdminTabCore
 		17 => $this->l('Module removed successfully from hook'), 18 => $this->l('Upload successful'),
 		19 => $this->l('Duplication completed successfully'), 20 => $this->l('Translation added successfully but the language has not been created'),
 		21 => $this->l('Module reset successfully'), 22 => $this->l('Module deleted successfully'),
-		23 => $this->l('Configuration pack imported successfully'), 24 => $this->l('Refund Successful'));
+		23 => $this->l('Localization pack imported successfully'), 24 => $this->l('Refund Successful'));
 		if (!$this->identifier) $this->identifier = 'id_'.$this->table;
 		if (!$this->_defaultOrderBy) $this->_defaultOrderBy = $this->identifier;
 		$className = get_class($this);
 		if ($className == 'AdminCategories' OR $className == 'AdminProducts')
 			$className = 'AdminCatalog';
 		$this->token = Tools::getAdminToken($className.(int)($this->id).(int)($cookie->id_employee));
+
 	}
 
+
+	/**
+	 * use translations files to replace english expression.
+	 *
+	 * @param mixed $string term or expression in english
+	 * @param string $class
+	 * @param boolan $addslashes if set to true, the return value will pass through addslashes(). Otherwise, stripslashes().
+	 * @param boolean $htmlentities if set to true(default), the return value will pass through htmlentities($string, ENT_QUOTES, 'utf-8')
+	 * @return string the translation if available, or the english default text.
+	 */
 	protected function l($string, $class = 'AdminTab', $addslashes = FALSE, $htmlentities = TRUE)
 	{
+		// if the class is extended by a module, use modules/[module_name]/xx.php lang file
+		$currentClass = get_class($this);
+		if(Module::getModuleNameFromClass($currentClass))
+		{
+			$string = str_replace('\'', '\\\'', $string);
+			return Module::findTranslation(Module::$classInModule[$currentClass], $string, $currentClass);
+		}
 		global $_LANGADM;
 
         if ($class == __CLASS__)
@@ -279,6 +297,7 @@ abstract class AdminTabCore
 		if ($res)
 			foreach ($res AS $row)
 				$required_fields[(int)$row['id_required_field']] = $row['field_name'];
+
 
 		$table_fields = Db::getInstance()->ExecuteS('SHOW COLUMNS FROM '.pSQL(_DB_PREFIX_.$this->table));
 		$irow = 0;
@@ -455,7 +474,7 @@ abstract class AdminTabCore
 	{
 		$dir = null;
 		/* Deleting object images and thumbnails (cache) */
-		if (key_exists('dir', $this->fieldImageSettings) AND $this->fieldImageSettings['dir'].'/')
+		if (key_exists('dir', $this->fieldImageSettings))
 		{
 			$dir = $this->fieldImageSettings['dir'].'/';
 			if (file_exists(_PS_IMG_DIR_.$dir.$id.'.'.$this->imageType) AND !unlink(_PS_IMG_DIR_.$dir.$id.'.'.$this->imageType))
@@ -506,7 +525,7 @@ abstract class AdminTabCore
 				if (Validate::isLoadedObject($object = $this->loadObject()) AND isset($this->fieldImageSettings))
 				{
 					// check if request at least one object with noZeroObject
-					if (isset($object->noZeroObject) AND sizeof($taxes = call_user_func(array($this->className, $object->noZeroObject))) <= 1)
+					if (isset($object->noZeroObject) AND sizeof(call_user_func(array($this->className, $object->noZeroObject))) <= 1)
 						$this->_errors[] = Tools::displayError('You need at least one object.').' <b>'.$this->table.'</b><br />'.Tools::displayError('You cannot delete all of the items.');
 					else
 					{
@@ -794,7 +813,7 @@ abstract class AdminTabCore
 						{
 							$sqlFilter .= ' AND ';
 							if ($type == 'int' OR $type == 'bool')
-								$sqlFilter .= (($key == $this->identifier OR $key == '`'.$this->identifier.'`') ? 'a.' : '').pSQL($key).' = '.(int)($value).' ';
+								$sqlFilter .= (($key == $this->identifier OR $key == '`'.$this->identifier.'`' OR $key == '`active`') ? 'a.' : '').pSQL($key).' = '.(int)($value).' ';
 							elseif ($type == 'decimal')
 								$sqlFilter .= (($key == $this->identifier OR $key == '`'.$this->identifier.'`') ? 'a.' : '').pSQL($key).' = '.(float)($value).' ';
 							elseif ($type == 'select')
@@ -1077,7 +1096,7 @@ abstract class AdminTabCore
 			LIMIT '.(int)($start).','.(int)($limit);
 
 		$this->_list = Db::getInstance()->ExecuteS($sql);
-		$this->_listTotal = Db::getInstance()->getValue('SELECT COUNT(*),
+		$this->_listTotal = count(Db::getInstance()->ExecuteS('SELECT
 			'.($this->_tmpTableFilter ? ' * FROM (SELECT ' : '').'
 			'.($this->lang ? 'b.*, ' : '').'a.*'.(isset($this->_select) ? ', '.$this->_select.' ' : '').'
 			FROM `'._DB_PREFIX_.$sqlTable.'` a
@@ -1087,7 +1106,9 @@ abstract class AdminTabCore
 			'.(isset($this->_group) ? $this->_group.' ' : '').'
 			'.((isset($this->_filterHaving) || isset($this->_having)) ? 'HAVING ' : '').(isset($this->_filterHaving) ? ltrim($this->_filterHaving, ' AND ') : '').(isset($this->_having) ? $this->_having.' ' : '').'
 			ORDER BY '.(($orderBy == $this->identifier) ? 'a.' : '').'`'.pSQL($orderBy).'` '.pSQL($orderWay).
-			($this->_tmpTableFilter ? ') tmpTable WHERE 1'.$this->_tmpTableFilter : ''));
+			($this->_tmpTableFilter ? ') tmpTable WHERE 1'.$this->_tmpTableFilter : '')));
+
+
 	}
 
 	/**
@@ -1124,6 +1145,10 @@ abstract class AdminTabCore
 	public function displayListHeader($token = NULL)
 	{
 		global $currentIndex, $cookie;
+		$isCms = false;
+		if (preg_match('/cms/Ui', $this->identifier))
+			$isCms = true;
+		$id_cat = Tools::getValue('id_'.($isCms ? 'cms_' : '').'category');
 
 		if (!isset($token) OR empty($token))
 			$token = $this->token;
@@ -1206,8 +1231,8 @@ abstract class AdminTabCore
 				if (Tools::getValue($this->table.'Orderby') && Tools::getValue($this->table.'Orderway'))
 					$currentIndex = preg_replace('/&'.$this->table.'Orderby=([a-z _]*)&'.$this->table.'Orderway=([a-z]*)/i', '', $currentIndex);
 				echo '	<br />
-						<a href="'.$currentIndex.'&'.$this->table.'Orderby='.urlencode($key).'&'.$this->table.'Orderway=desc&token='.$token.'"><img border="0" src="../img/admin/down'.((isset($this->_orderBy) AND ($key == $this->_orderBy) AND ($this->_orderWay == 'DESC')) ? '_d' : '').'.gif" /></a>
-						<a href="'.$currentIndex.'&'.$this->table.'Orderby='.urlencode($key).'&'.$this->table.'Orderway=asc&token='.$token.'"><img border="0" src="../img/admin/up'.((isset($this->_orderBy) AND ($key == $this->_orderBy) AND ($this->_orderWay == 'ASC')) ? '_d' : '').'.gif" /></a>';
+						<a href="'.$currentIndex.'&'.$this->identifier.'='.$id_cat.'&'.$this->table.'Orderby='.urlencode($key).'&'.$this->table.'Orderway=desc&token='.$token.'"><img border="0" src="../img/admin/down'.((isset($this->_orderBy) AND ($key == $this->_orderBy) AND ($this->_orderWay == 'DESC')) ? '_d' : '').'.gif" /></a>
+						<a href="'.$currentIndex.'&'.$this->identifier.'='.$id_cat.'&'.$this->table.'Orderby='.urlencode($key).'&'.$this->table.'Orderway=asc&token='.$token.'"><img border="0" src="../img/admin/up'.((isset($this->_orderBy) AND ($key == $this->_orderBy) AND ($this->_orderWay == 'ASC')) ? '_d' : '').'.gif" /></a>';
 			}
 			echo '	</th>';
 		}
@@ -1446,7 +1471,7 @@ abstract class AdminTabCore
 	{
 	    global $currentIndex;
 
-	    echo '<a href="'.$currentIndex.'&'.$this->identifier.'='.$id.'&'.$active.
+	    echo '<a href="'.$currentIndex.'&'.$this->identifier.'='.$id.'&'.$active.$this->table.
 	        ((int)$id_category AND (int)$id_product ? '&id_category='.$id_category : '').'&token='.($token!=NULL ? $token : $this->token).'">
 	        <img src="../img/admin/'.($value ? 'enabled.gif' : 'disabled.gif').'"
 	        alt="'.($value ? $this->l('Enabled') : $this->l('Disabled')).'" title="'.($value ? $this->l('Enabled') : $this->l('Disabled')).'" /></a>';

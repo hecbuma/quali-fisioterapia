@@ -20,7 +20,7 @@
 					{if isset($back)}<input type="hidden" class="hidden" name="back" value="{$back|escape:'htmlall':'UTF-8'}" />{/if}
 					<input type="submit" id="SubmitLogin" name="SubmitLogin" class="button" value="{l s='Log in'}" />
 				</p>
-				<p class="lost_password"><a href="{$base_dir}password.php">{l s='Forgot your password?'}</a></p>
+				<p class="lost_password"><a href="{$link->getPageLink('password.php', true)}">{l s='Forgot your password?'}</a></p>
 			</div>
 		</fieldset>
 	</form>
@@ -169,6 +169,7 @@
 						{/foreach}
 					</select>
 				</p>
+				{if $newsletter}
 				<p class="checkbox">
 					<input type="checkbox" name="newsletter" id="newsletter" value="1" {if isset($guestInformations) && $guestInformations.newsletter}checked="checked"{/if} />
 					<label for="newsletter">{l s='Sign up for our newsletter'}</label>
@@ -177,6 +178,7 @@
 					<input type="checkbox"name="optin" id="optin" value="1" {if isset($guestInformations) && $guestInformations.optin}checked="checked"{/if} />
 					<label for="optin">{l s='Receive special offers from our partners'}</label>
 				</p>
+				{/if}
 				<h3>{l s='Delivery address'}</h3>
 				<p class="text">
 					<label for="company">{l s='Company'}</label>

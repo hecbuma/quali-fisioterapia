@@ -253,7 +253,7 @@ var fieldRequired = '{l s='Please fill in all required fields' js=1}';
 					<span class="our_price_display">
 					{if $priceDisplay >= 0 && $priceDisplay <= 2}
 						<span id="our_price_display">{convertPrice price=$productPrice}</span>
-							{if $tax_enabled}
+							{if $tax_enabled  && $display_tax_label == 1}
 								{if $priceDisplay == 1}{l s='tax excl.'}{else}{l s='tax incl.'}{/if}
 							{/if}
 					{/if}
@@ -269,7 +269,7 @@ var fieldRequired = '{l s='Please fill in all required fields' js=1}';
 					{if $priceDisplay >= 0 && $priceDisplay <= 2}
 						{if $productPriceWithoutRedution > $productPrice}
 							<span id="old_price_display">{convertPrice price=$productPriceWithoutRedution}</span>
-								{if $tax_enabled}
+								{if $tax_enabled && $display_tax_label == 1}
 									{if $priceDisplay == 1}{l s='tax excl.'}{else}{l s='tax incl.'}{/if}
 								{/if}
 						{/if}
@@ -320,7 +320,7 @@ var fieldRequired = '{l s='Please fill in all required fields' js=1}';
 			<p id="product_reference" {if isset($groups) OR !$product->reference}style="display: none;"{/if}><label for="product_reference">{l s='Reference :'} </label><span class="editable">{$product->reference|escape:'htmlall':'UTF-8'}</span></p>
 
 			<!-- quantity wanted -->
-			<p id="quantity_wanted_p"{if (!$allow_oosp && $product->quantity == 0) OR $virtual OR !$product->available_for_order OR $PS_CATALOG_MODE} style="display: none;"{/if}>
+			<p id="quantity_wanted_p"{if (!$allow_oosp && $product->quantity <= 0) OR $virtual OR !$product->available_for_order OR $PS_CATALOG_MODE} style="display: none;"{/if}>
 				<label>{l s='Quantity :'}</label>
 				<input type="text" name="qty" id="quantity_wanted" class="text" value="{if isset($quantityBackup)}{$quantityBackup|intval}{else}{if $product->minimal_quantity > 1}{$product->minimal_quantity}{else}1{/if}{/if}" size="2" maxlength="3" {if $product->minimal_quantity > 1}onkeyup="checkMinimalQuantity({$product->minimal_quantity});"{/if} />
 			</p>
@@ -334,16 +334,16 @@ var fieldRequired = '{l s='Please fill in all required fields' js=1}';
 			{/if}
 
 			<!-- availability -->
-			<p id="availability_statut"{if ($product->quantity == 0 && !$product->available_later) OR ($product->quantity != 0 && !$product->available_now) OR !$product->available_for_order OR $PS_CATALOG_MODE} style="display: none;"{/if}>
+			<p id="availability_statut"{if ($product->quantity <= 0 && !$product->available_later && $allow_oosp) OR ($product->quantity > 0 && !$product->available_now) OR !$product->available_for_order OR $PS_CATALOG_MODE} style="display: none;"{/if}>
 				<span id="availability_label">{l s='Availability:'}</span>
-				<span id="availability_value"{if $product->quantity == 0} class="warning-inline"{/if}>
-					{if $product->quantity == 0}{if $allow_oosp}{$product->available_later}{else}{l s='This product is no longer in stock'}{/if}{else}{$product->available_now}{/if}
+				<span id="availability_value"{if $product->quantity <= 0} class="warning_inline"{/if}>
+					{if $product->quantity <= 0}{if $allow_oosp}{$product->available_later}{else}{l s='This product is no longer in stock'}{/if}{else}{$product->available_now}{/if}
 				</span>
 			</p>
 
-			<!-- number of item in stock -->
-			{if ($product->quantity <= $last_qties OR isset($combination.list))}
-			<p id="pQuantityAvailable"{if $display_qties != 1 OR $product->quantity <= 0 OR !$product->available_for_order OR $PS_CATALOG_MODE} style="display: none;"{/if}>
+			<!-- number of item in stock OR isset($combination.list)-->
+			{if (($display_qties == 1 OR $product->quantity <= $last_qties) && !$PS_CATALOG_MODE && $product->available_for_order)}
+			<p id="pQuantityAvailable"{if $product->quantity <= 0} style="display: none;"{/if}>
 				<span id="quantityAvailable">{$product->quantity|intval}</span>
 				<span {if $product->quantity > 1} style="display: none;"{/if} id="quantityAvailableTxt">{l s='item in stock'}</span>
 				<span {if $product->quantity == 1} style="display: none;"{/if} id="quantityAvailableTxtMultiple">{l s='items in stock'}</span>
@@ -354,7 +354,7 @@ var fieldRequired = '{l s='Please fill in all required fields' js=1}';
 				{$HOOK_PRODUCT_OOS}
 			</p>
 
-			<p class="warning_inline" id="last_quantities"{if ($product->quantity > $last_qties OR $product->quantity == 0) OR $allow_oosp OR !$product->available_for_order OR $PS_CATALOG_MODE} style="display: none;"{/if} >{l s='Warning: Last items in stock!'}</p>
+			<p class="warning_inline" id="last_quantities"{if ($product->quantity > $last_qties OR $product->quantity <= 0) OR $allow_oosp OR !$product->available_for_order OR $PS_CATALOG_MODE} style="display: none;"{/if} >{l s='Warning: Last items in stock!'}</p>
 
 			{if $product->online_only}
 				<p>{l s='Online only'}</p>
@@ -430,7 +430,7 @@ var fieldRequired = '{l s='Please fill in all required fields' js=1}';
 	{if $attachments}
 		<ul id="idTab9" class="bullet">
 		{foreach from=$attachments item=attachment}
-			<li><a href="{$base_dir}attachment.php?id_attachment={$attachment.id_attachment}">{$attachment.name|escape:'htmlall':'UTF-8'}</a><br />{$attachment.description|escape:'htmlall':'UTF-8'}</li>
+			<li><a href="{$link->getPageLink('attachment.php', true)}?id_attachment={$attachment.id_attachment}">{$attachment.name|escape:'htmlall':'UTF-8'}</a><br />{$attachment.description|escape:'htmlall':'UTF-8'}</li>
 		{/foreach}
 		</ul>
 	{/if}
@@ -451,9 +451,15 @@ var fieldRequired = '{l s='Please fill in all required fields' js=1}';
 							<p class="product_accessories_price">
 								{if $accessory.show_price AND !isset($restricted_country_mode) AND !$PS_CATALOG_MODE}<span class="price">{if $priceDisplay != 1}{displayWtPrice p=$accessory.price}{else}{displayWtPrice p=$accessory.price_tax_exc}{/if}</span>{/if}
 								<a class="button" href="{$accessoryLink|escape:'htmlall':'UTF-8'}" title="{l s='View'}">{l s='View'}</a>
-								{if $accessory.available_for_order AND !isset($restricted_country_mode) AND !$PS_CATALOG_MODE}<a class="exclusive button ajax_add_to_cart_button" href="{$link->getPageLink('cart.php')}?qty=1&amp;id_product={$accessory.id_product|intval}&amp;token={$static_token}&amp;add" rel="ajax_id_product_{$accessory.id_product|intval}" title="{l s='Add to cart'}">{l s='Add to cart'}</a>{/if}
+								{if ($accessory.allow_oosp || $accessory.quantity > 0) AND $accessory.available_for_order AND !isset($restricted_country_mode) AND !$PS_CATALOG_MODE}
+									<a class="exclusive button ajax_add_to_cart_button" href="{$link->getPageLink('cart.php')}?qty=1&amp;id_product={$accessory.id_product|intval}&amp;token={$static_token}&amp;add" rel="ajax_id_product_{$accessory.id_product|intval}" title="{l s='Add to cart'}">{l s='Add to cart'}</a>
+								{else}
+									<span class="exclusive">{l s='Add to cart'}</span>
+									<span class="availability">{if (isset($accessory.quantity_all_versions) && $accessory.quantity_all_versions > 0)}{l s='Product available with different options'}{else}{l s='Out of stock'}{/if}</span>
+								{/if}
 							</p>
 						</li>
+
 					{/foreach}
 					</ul>
 				</div>
@@ -484,7 +490,12 @@ var fieldRequired = '{l s='Please fill in all required fields' js=1}';
 				{foreach from=$customizationFields item='field' name='customizationFields'}
 					{if $field.type == 0}
 						<li class="customizationUploadLine{if $field.required} required{/if}">{assign var='key' value='pictures_'|cat:$product->id|cat:'_'|cat:$field.id_customization_field}
-							{if isset($pictures.$key)}<div class="customizationUploadBrowse"><img src="{$pic_dir}{$pictures.$key}_small" alt="" /><a href="{$link->getUrlWith('deletePicture', $field.id_customization_field)}"><img src="{$img_dir}icon/delete.gif" alt="{l s='Delete'}" class="customization_delete_icon" width="11" height="13" /></a></div>{/if}
+							{if isset($pictures.$key)}<div class="customizationUploadBrowse">
+									<img src="{$pic_dir}{$pictures.$key}_small" alt="" />
+									<a href="{$link->getProductDeletePictureLink($product,{$field.id_customization_field})}" title="{l s='Delete'}" >
+										<img src="{$img_dir}icon/delete.gif" alt="{l s='Delete'}" class="customization_delete_icon" width="11" height="13" />
+									</a>
+								</div>{/if}
 							<div class="customizationUploadBrowse"><input type="file" name="file{$field.id_customization_field}" id="img{$customizationField}" class="customization_block_input {if isset($pictures.$key)}filled{/if}" />{if $field.required}<sup>*</sup>{/if}
 							<div class="customizationUploadBrowseDescription">{if !empty($field.name)}{$field.name}{else}{l s='Please select an image file from your hard drive'}{/if}</div></div>
 						</li>

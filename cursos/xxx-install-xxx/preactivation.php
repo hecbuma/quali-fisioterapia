@@ -5,9 +5,9 @@
 	function getPreinstallXmlLang($object, $field)
 	{
 		if (property_exists($object, $field.'_'.((int)($_GET['language'])+1)))
-			return trim($object->{$field.'_'.((int)($_GET['language'])+1)});
+			return str_replace(array('!|', '|!'), array('<', '>'), trim($object->{$field.'_'.((int)($_GET['language'])+1)}));
 		if (property_exists($object, $field.'_1'))
-			return trim($object->{$field.'_1'});
+			return str_replace(array('!|', '|!'), array('<', '>'), trim($object->{$field.'_1'}));
 		return '';
 	}
 
@@ -71,22 +71,25 @@
 				echo '
 				<script>'."
 					$('#btNext').click(function() {
-						$.ajax({
-						  url: 'preactivation.php?request=send'+
-							'&partner=".$p."'+
-							".$varList."
-							'&language_iso_code='+isoCodeLocalLanguage+
-							'&country_iso_code='+encodeURIComponent($('select#infosCountry option:selected').attr('rel'))+
-							'&activity='+ encodeURIComponent($('select#infosActivity').val())+
-							'&timezone='+ encodeURIComponent($('select#infosTimezone').val())+
-							'&shop='+ encodeURIComponent($('input#infosShop').val())+
-							'&firstName='+ encodeURIComponent($('input#infosFirstname').val())+
-							'&lastName='+ encodeURIComponent($('input#infosName').val())+
-							'&email='+ encodeURIComponent($('input#infosEmail').val()),
-						  context: document.body,
-						  success: function(data) {
-						  }
-						});
+						if (moduleChecked['".strtoupper($c).'_'.$p."'] == 1 && $('select#infosCountry option:selected').attr('rel') == '".strtoupper($c)."')
+						{
+							$.ajax({
+							  url: 'preactivation.php?request=send'+
+								'&partner=".$p."'+
+								".$varList."
+								'&language_iso_code='+isoCodeLocalLanguage+
+								'&country_iso_code='+encodeURIComponent($('select#infosCountry option:selected').attr('rel'))+
+								'&activity='+ encodeURIComponent($('select#infosActivity').val())+
+								'&timezone='+ encodeURIComponent($('select#infosTimezone').val())+
+								'&shop='+ encodeURIComponent($('input#infosShop').val())+
+								'&firstName='+ encodeURIComponent($('input#infosFirstname').val())+
+								'&lastName='+ encodeURIComponent($('input#infosName').val())+
+								'&email='+ encodeURIComponent($('input#infosEmail').val()),
+							  context: document.body,
+							  success: function(data) {
+							  }
+							});
+						}
 					});".'
 				</script>';
 			}

@@ -114,7 +114,6 @@ var ajaxCart = {
 
 		}
 	},
-
 	// cart to fix display when using back and previous browsers buttons
 	refresh : function(){
 		//send the ajax request to the server
@@ -174,7 +173,7 @@ var ajaxCart = {
 			$('.filled').removeClass('filled');
 		}
 		else
-			$('.ajax_add_to_cart_button').attr('disabled', 'disabled');
+			$(callerElement).attr('disabled', 'disabled');
 
 		if ($('#cart_block #cart_block_list').hasClass('collapsed'))
 			this.expand();
@@ -186,7 +185,7 @@ var ajaxCart = {
 			cache: false,
 			dataType : "json",
 			data: 'add=1&ajax=true&qty=' + ((quantity && quantity != null) ? quantity : '1') + '&id_product=' + idProduct + '&token=' + static_token + ( (parseInt(idCombination) && idCombination != null) ? '&ipa=' + parseInt(idCombination): ''),
-			success: function(jsonData)
+			success: function(jsonData,textStatus,jqXHR)
 			{
 				// add appliance to whishlist module
 				if (whishlist && !jsonData.errors)
@@ -221,7 +220,7 @@ var ajaxCart = {
 				if (addedFromProductPage)
 					$('body#product p#add_to_cart input').removeAttr('disabled').addClass('exclusive').removeClass('exclusive_disabled');
 				else
-					$('.ajax_add_to_cart_button').removeAttr('disabled');
+					$(callerElement).removeAttr('disabled');
 			}
 		});
 	},
@@ -536,7 +535,6 @@ var ajaxCart = {
 		}
 		else
 		{
-			ajaxCart.expand();
 			ajaxCart.updateCartEverywhere(jsonData);
 			ajaxCart.hideOldProducts(jsonData);
 			ajaxCart.displayNewProducts(jsonData);

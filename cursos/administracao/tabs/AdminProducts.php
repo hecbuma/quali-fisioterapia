@@ -45,13 +45,13 @@ class AdminProducts extends AdminTab
 		$this->view = false;
 		$this->duplicate = true;
 		$this->imageType = 'jpg';
-
+		
 		$this->fieldsDisplay = array(
 			'id_product' => array('title' => $this->l('ID'), 'align' => 'center', 'width' => 20),
-			'image' => array('title' => $this->l('Photo'), 'align' => 'center', 'image' => 'p', 'width' => 45, 'orderby' => false, 'filter' => false, 'search' => false),
-			'name' => array('title' => $this->l('Name'), 'width' => 220, 'filter_key' => 'b!name'),
+		//	'image' => array('title' => $this->l('Photo'), 'align' => 'center', 'image' => 'p', 'width' => 45, 'orderby' => false, 'filter' => false, 'search' => false),
+			'name' => array('title' => $this->l('Name'), 'width' => 350, 'filter_key' => 'b!name'),
 			'reference' => array('title' => $this->l('Reference'), 'align' => 'center', 'width' => 20),
-			'price' => array('title' => $this->l('Base price'), 'width' => 70, 'price' => true, 'align' => 'right', 'filter_key' => 'a!price'),
+		//	'price' => array('title' => $this->l('Base price'), 'width' => 70, 'price' => true, 'align' => 'right', 'filter_key' => 'a!price'),
 			'price_final' => array('title' => $this->l('Final price'), 'width' => 70, 'price' => true, 'align' => 'right', 'havingFilter' => true, 'orderby' => false),
 			'quantity' => array('title' => $this->l('Quantity'), 'width' => 30, 'align' => 'right', 'filter_key' => 'a!quantity', 'type' => 'decimal'),
 			'position' => array('title' => $this->l('Position'), 'width' => 40,'filter_key' => 'cp!position', 'align' => 'center', 'position' => 'position'),
@@ -100,7 +100,7 @@ class AdminProducts extends AdminTab
 		foreach ($languages as $language)
 			if (isset($_POST['meta_keywords_'.$language['id_lang']]))
 			{
-				$_POST['meta_keywords_'.$language['id_lang']] = $this->_cleanMetaKeywords(strtolower($_POST['meta_keywords_'.$language['id_lang']])); // preg_replace('/ *,? +,* /', ',', strtolower($_POST['meta_keywords_'.$language['id_lang']]));
+				$_POST['meta_keywords_'.$language['id_lang']] = $this->_cleanMetaKeywords(Tools::strtolower($_POST['meta_keywords_'.$language['id_lang']])); // preg_replace('/ *,? +,* /', ',', strtolower($_POST['meta_keywords_'.$language['id_lang']]));
 				$object->meta_keywords[$language['id_lang']] = $_POST['meta_keywords_'.$language['id_lang']];
 			}
 		$_POST['width'] = empty($_POST['width']) ? '0' : str_replace(',', '.', $_POST['width']);
@@ -198,15 +198,23 @@ class AdminProducts extends AdminTab
 			{
 
 				$languages = Language::getLanguages(false);
+				$is_attachment_name_valid = false;
 				foreach ($languages AS $language)
 				{
-					if (!Validate::isGenericName(Tools::getValue('attachment_name_'.(int)($language['id_lang']))))
+					$attachment_name_lang = Tools::getValue('attachment_name_'.(int)($language['id_lang']));
+					if (strlen($attachment_name_lang ) > 0)
+						$is_attachment_name_valid = true;
+
+					if(!Validate::isGenericName(Tools::getValue('attachment_name_'.(int)($language['id_lang']))))
 						$this->_errors[] = Tools::displayError('Invalid Name');
 					elseif (Tools::strlen(Tools::getValue('attachment_name_'.(int)($language['id_lang']))) > 32)
 						$this->_errors[] = Tools::displayError('Name is too long');
 					if (!Validate::isCleanHtml(Tools::getValue('attachment_description_'.(int)($language['id_lang']))))
 						$this->_errors[] = Tools::displayError('Invalid description');
 				}
+				if (!$is_attachment_name_valid)
+					$this->_errors[] = Tools::displayError('Attachment Name Required');
+
 				if (empty($this->_errors))
 				{
 					if (isset($_FILES['attachment_file']) AND is_uploaded_file($_FILES['attachment_file']['tmp_name']))
@@ -251,7 +259,7 @@ class AdminProducts extends AdminTab
 						if (!sizeof($this->_errors))
 						{
 							$attachment->add();
-							Tools::redirectAdmin($currentIndex.'&id_product='.(int)(Tools::getValue($this->identifier)).'&addproduct&conf=4&tabs=6&token='.($token ? $token : $this->token));
+							Tools::redirectAdmin($currentIndex.'&id_product='.(int)(Tools::getValue($this->identifier)).'&id_category='.(int)(Tools::getValue('id_category')).'&addproduct&conf=4&tabs=6&token='.($token ? $token : $this->token));
 						}
 						else
 							$this->_errors[] = Tools::displayError('Invalid file');
@@ -342,7 +350,13 @@ class AdminProducts extends AdminTab
 						$id_category = Tools::getValue('id_category');
 						$category_url = empty($id_category) ? '' : '&id_category='.$id_category;
 
-						$this->deleteImage($object->id);
+						if ($this->table == 'product')
+						{
+							$product = new Product($object->id);
+							$product->deleteImages();
+						}else
+							$this->deleteImage($object->id);
+							
 						if ($this->deleted)
 						{
 							$object->deleted = 1;
@@ -513,7 +527,7 @@ class AdminProducts extends AdminTab
 								Tools::getValue('attribute_location'),
 								Tools::getValue('attribute_upc'),
 								Tools::getValue('minimal_quantity'));
-								if ($id_reason = (int)Tools::getValue('id_mvt_reason'))
+								if ($id_reason = (int)Tools::getValue('id_mvt_reason') AND (int)Tools::getValue('attribute_mvt_quantity') > 0 AND $id_reason > 0)
 								{
 									$reason = new StockMvtReason((int)$id_reason);
 									$qty = Tools::getValue('attribute_mvt_quantity') * $reason->sign; 
@@ -1155,7 +1169,7 @@ class AdminProducts extends AdminTab
 					$this->copyFromPost($object, $this->table);
 					if ($object->update())
 					{					
-						if ($id_reason = (int)Tools::getValue('id_mvt_reason'))
+						if ($id_reason = (int)Tools::getValue('id_mvt_reason') AND (int)Tools::getValue('mvt_quantity') > 0 AND $id_reason > 0)
 						{
 							$reason = new StockMvtReason((int)$id_reason);
 							$qty = Tools::getValue('mvt_quantity') * $reason->sign; 
@@ -1183,7 +1197,7 @@ class AdminProducts extends AdminTab
 							if (Tools::isSubmit('submitAddProductAndPreview'))
 							{
 								$preview_url = ($link->getProductLink($this->getFieldValue($object, 'id'), $this->getFieldValue($object, 'link_rewrite', $this->_defaultFormLanguage), Category::getLinkRewrite($this->getFieldValue($object, 'id_category_default'), (int)($cookie->id_lang))));
-								if (!$obj->active)
+								if (!$object->active)
 								{
 									$admin_dir = dirname($_SERVER['PHP_SELF']);
 									$admin_dir = substr($admin_dir, strrpos($admin_dir,'/') + 1);
@@ -2157,7 +2171,7 @@ class AdminProducts extends AdminTab
 		foreach ($this->_languages as $language)
 			echo '		<div class="lang_'.$language['id_lang'].'" style="display: '.($language['id_lang'] == $this->_defaultFormLanguage ? 'block' : 'none').'; float: left;">
 								<input size="43" type="text" id="name_'.$language['id_lang'].'" name="name_'.$language['id_lang'].'"
-								value="'.stripslashes(htmlspecialchars($this->getFieldValue($obj, 'name', $language['id_lang']))).'"'.((!$obj->id) ? ' onkeyup="copy2friendlyURL();"' : '').' onkeyup="updateCurrentText();" onchange="updateCurrentText();" /><sup> *</sup>
+								value="'.stripslashes(htmlspecialchars($this->getFieldValue($obj, 'name', $language['id_lang']))).'"'.((!$obj->id) ? ' onkeyup="if (isArrowKey(event)) return; copy2friendlyURL();"' : '').' onkeyup="if (isArrowKey(event)) return; updateCurrentText();" onchange="updateCurrentText();" /><sup> *</sup>
 								<span class="hint" name="help_box">'.$this->l('Invalid characters:').' <>;=#{}<span class="hint-pointer">&nbsp;</span></span>
 							</div>';
 		echo '		</td>
@@ -2197,25 +2211,25 @@ class AdminProducts extends AdminTab
 					<tr>
 						<td class="col-left">'.$this->l('Width ( package ) :').'</td>
 						<td style="padding-bottom:5px;">
-							<input size="6" maxlength="6" name="width" type="text" value="'.htmlentities($this->getFieldValue($obj, 'width'), ENT_COMPAT, 'UTF-8').'" onKeyUp="javascript:this.value = this.value.replace(/,/g, \'.\');" /> '.Configuration::get('PS_DIMENSION_UNIT').'
+							<input size="6" maxlength="6" name="width" type="text" value="'.htmlentities($this->getFieldValue($obj, 'width'), ENT_COMPAT, 'UTF-8').'" onKeyUp="if (isArrowKey(event)) return ;this.value = this.value.replace(/,/g, \'.\');" /> '.Configuration::get('PS_DIMENSION_UNIT').'
 						</td>
 					</tr>
 					<tr>
 						<td class="col-left">'.$this->l('Height ( package ) :').'</td>
 						<td style="padding-bottom:5px;">
-							<input size="6" maxlength="6" name="height" type="text" value="'.htmlentities($this->getFieldValue($obj, 'height'), ENT_COMPAT, 'UTF-8').'" onKeyUp="javascript:this.value = this.value.replace(/,/g, \'.\');" /> '.Configuration::get('PS_DIMENSION_UNIT').'
+							<input size="6" maxlength="6" name="height" type="text" value="'.htmlentities($this->getFieldValue($obj, 'height'), ENT_COMPAT, 'UTF-8').'" onKeyUp="if (isArrowKey(event)) return ;this.value = this.value.replace(/,/g, \'.\');" /> '.Configuration::get('PS_DIMENSION_UNIT').'
 						</td>
 					</tr>
 					<tr>
 						<td class="col-left">'.$this->l('Deep ( package ) :').'</td>
 						<td style="padding-bottom:5px;">
-							<input size="6" maxlength="6" name="depth" type="text" value="'.htmlentities($this->getFieldValue($obj, 'depth'), ENT_COMPAT, 'UTF-8').'" onKeyUp="javascript:this.value = this.value.replace(/,/g, \'.\');" /> '.Configuration::get('PS_DIMENSION_UNIT').'
+							<input size="6" maxlength="6" name="depth" type="text" value="'.htmlentities($this->getFieldValue($obj, 'depth'), ENT_COMPAT, 'UTF-8').'" onKeyUp="if (isArrowKey(event)) return ;this.value = this.value.replace(/,/g, \'.\');" /> '.Configuration::get('PS_DIMENSION_UNIT').'
 						</td>
 					</tr>
 					<tr>
 						<td class="col-left">'.$this->l('Weight ( package ) :').'</td>
 						<td style="padding-bottom:5px;">
-							<input size="6" maxlength="6" name="weight" type="text" value="'.htmlentities($this->getFieldValue($obj, 'weight'), ENT_COMPAT, 'UTF-8').'" onKeyUp="javascript:this.value = this.value.replace(/,/g, \'.\');" /> '.Configuration::get('PS_WEIGHT_UNIT').'
+							<input size="6" maxlength="6" name="weight" type="text" value="'.htmlentities($this->getFieldValue($obj, 'weight'), ENT_COMPAT, 'UTF-8').'" onKeyUp="if (isArrowKey(event)) return ;this.value = this.value.replace(/,/g, \'.\');" /> '.Configuration::get('PS_WEIGHT_UNIT').'
 						</td>
 					</tr>
 				</table>
@@ -2471,7 +2485,7 @@ class AdminProducts extends AdminTab
 					<tr>
 						<td class="col-left">'.$this->l('Pre-tax wholesale price:').'</td>
 						<td style="padding-bottom:5px;">
-							'.($currency->format == 1 ? $currency->sign.' ' : '').'<input size="11" maxlength="14" name="wholesale_price" type="text" value="'.htmlentities($this->getFieldValue($obj, 'wholesale_price'), ENT_COMPAT, 'UTF-8').'" onchange="this.value = this.value.replace(/,/g, \'.\');" />'.($currency->format == 2 ? ' '.$currency->sign : '').'
+							'.($currency->format % 2 != 0 ? $currency->sign.' ' : '').'<input size="11" maxlength="14" name="wholesale_price" type="text" value="'.htmlentities($this->getFieldValue($obj, 'wholesale_price'), ENT_COMPAT, 'UTF-8').'" onchange="this.value = this.value.replace(/,/g, \'.\');" />'.($currency->format % 2 == 0 ? ' '.$currency->sign : '').'
 							<span style="margin-left:10px">'.$this->l('The wholesale price at which you bought this product').'</span>
 						</td>
 					</tr>';
@@ -2479,7 +2493,7 @@ class AdminProducts extends AdminTab
 					<tr>
 						<td class="col-left">'.$this->l('Pre-tax retail price:').'</td>
 						<td style="padding-bottom:5px;">
-							'.($currency->format == 1 ? $currency->sign.' ' : '').'<input size="11" maxlength="14" id="priceTE" name="price" type="text" value="'.$this->getFieldValue($obj, 'price').'" onchange="this.value = this.value.replace(/,/g, \'.\');" onkeyup="calcPriceTI();" />'.($currency->format == 2 ? ' '.$currency->sign : '').'<sup> *</sup>
+							'.($currency->format % 2 != 0 ? $currency->sign.' ' : '').'<input size="11" maxlength="14" id="priceTE" name="price" type="text" value="'.$this->getFieldValue($obj, 'price').'" onchange="this.value = this.value.replace(/,/g, \'.\');" onkeyup="if(isArrowKey(event)) return; calcPriceTI();" />'.($currency->format % 2 == 0 ? ' '.$currency->sign : '').'<sup> *</sup>
 							<span style="margin-left:2px">'.$this->l('The pre-tax retail price to sell this product').'</span>
 						</td>
 					</tr>';
@@ -2529,7 +2543,7 @@ class AdminProducts extends AdminTab
 					<tr>
 						<td class="col-left">'.$this->l('Eco-tax (tax incl.):').'</td>
 						<td style="padding-bottom:5px;">
-							'.($currency->format == 1 ? $currency->sign.' ' : '').'<input size="11" maxlength="14" id="ecotax" name="ecotax" type="text" value="'.$this->getFieldValue($obj, 'ecotax').'" onkeyup="calcPriceTE(); this.value = this.value.replace(/,/g, \'.\'); if (parseInt(this.value) > getE(\'priceTE\').value) this.value = getE(\'priceTE\').value; if (isNaN(this.value)) this.value = 0;" />'.($currency->format == 2 ? ' '.$currency->sign : '').'
+							'.($currency->format % 2 != 0 ? $currency->sign.' ' : '').'<input size="11" maxlength="14" id="ecotax" name="ecotax" type="text" value="'.$this->getFieldValue($obj, 'ecotax').'" onkeyup="if(isArrowKey(event))return; calcPriceTE(); this.value = this.value.replace(/,/g, \'.\'); if (parseInt(this.value) > getE(\'priceTE\').value) this.value = getE(\'priceTE\').value; if (isNaN(this.value)) this.value = 0;" />'.($currency->format % 2 == 0 ? ' '.$currency->sign : '').'
 							<span style="margin-left:10px">('.$this->l('already included in price').')</span>
 						</td>
 					</tr>';
@@ -2538,14 +2552,14 @@ class AdminProducts extends AdminTab
 					<tr '.(Tax::excludeTaxeOption() ? 'style="display:none"' : '' ).'>
 						<td class="col-left">'.$this->l('Retail price with tax:').'</td>
 						<td style="padding-bottom:5px;">
-							'.($currency->format == 1 ? ' '.$currency->sign : '').' <input size="11" maxlength="14" id="priceTI" type="text" value="" onchange="noComma(\'priceTI\');" onkeyup="calcPriceTE();" />'.($currency->format == 2 ? ' '.$currency->sign : '').'
+							'.($currency->format % 2 != 0 ? ' '.$currency->sign : '').' <input size="11" maxlength="14" id="priceTI" type="text" value="" onchange="noComma(\'priceTI\');" onkeyup="if (isArrowKey(event)) return;  calcPriceTE();" />'.($currency->format % 2 == 0 ? ' '.$currency->sign : '').'
 						</td>
 					</tr>
 					<tr id="tr_unit_price">
 						<td class="col-left">'.$this->l('Unit price without tax:').'</td>
 						<td style="padding-bottom:5px;">
-							'.($currency->format == 1 ? ' '.$currency->sign : '').' <input size="11" maxlength="14" id="unit_price" name="unit_price" type="text" value="'.($this->getFieldValue($obj, 'unit_price_ratio') != 0 ? Tools::ps_round($this->getFieldValue($obj, 'price') / $this->getFieldValue($obj, 'unit_price_ratio'), 2) : 0).'" onkeyup="this.value = this.value.replace(/,/g, \'.\'); unitPriceWithTax(\'unit\');"/>'.($currency->format == 2 ? ' '.$currency->sign : '').' '.$this->l('per').' <input size="6" maxlength="10" id="unity" name="unity" type="text" value="'.htmlentities($this->getFieldValue($obj, 'unity'), ENT_QUOTES, 'UTF-8').'" onkeyup="unitySecond();" onchange="unitySecond();"/>'.
-							(Configuration::get('PS_TAX') ? '<span style="margin-left:15px">'.$this->l('or').' '.($currency->format == 1 ? ' '.$currency->sign : '').'<span id="unit_price_with_tax">0.00</span>'.($currency->format == 2 ? ' '.$currency->sign : '').' '.$this->l('per').' <span id="unity_second">'.$this->getFieldValue($obj, 'unity').'</span> '.$this->l('with tax') : '').'</span>
+							'.($currency->format % 2 != 0 ? ' '.$currency->sign : '').' <input size="11" maxlength="14" id="unit_price" name="unit_price" type="text" value="'.($this->getFieldValue($obj, 'unit_price_ratio') != 0 ? Tools::ps_round($this->getFieldValue($obj, 'price') / $this->getFieldValue($obj, 'unit_price_ratio'), 2) : 0).'" onkeyup="if (isArrowKey(event)) return ;this.value = this.value.replace(/,/g, \'.\'); unitPriceWithTax(\'unit\');"/>'.($currency->format % 2 == 0 ? ' '.$currency->sign : '').' '.$this->l('per').' <input size="6" maxlength="10" id="unity" name="unity" type="text" value="'.htmlentities($this->getFieldValue($obj, 'unity'), ENT_QUOTES, 'UTF-8').'" onkeyup="if (isArrowKey(event)) return ;unitySecond();" onchange="unitySecond();"/>'.
+							(Configuration::get('PS_TAX') ? '<span style="margin-left:15px">'.$this->l('or').' '.($currency->format % 2 != 0 ? ' '.$currency->sign : '').'<span id="unit_price_with_tax">0.00</span>'.($currency->format % 2 == 0 ? ' '.$currency->sign : '').' '.$this->l('per').' <span id="unity_second">'.$this->getFieldValue($obj, 'unity').'</span> '.$this->l('with tax') : '').'</span>
 							<p>'.$this->l('Eg. $15 per Lb').'</p>
 						</td>
 					</tr>
@@ -2558,8 +2572,8 @@ class AdminProducts extends AdminTab
 					<tr>
 						<td class="col-left"><b>'.$this->l('Final retail price:').'</b></td>
 						<td style="padding-bottom:5px;">
-							'.($currency->format == 1 ? $currency->sign.' ' : '').'<span id="finalPrice" style="font-weight: bold;"></span>'.($currency->format == 2 ? ' '.$currency->sign : '').'<span'.(!Configuration::get('PS_TAX') ? ' style="display:none;"' : '').'> ('.$this->l('tax incl.').')</span>
-							<span'.(!Configuration::get('PS_TAX') ? ' style="display:none;"' : '').'> / '.($currency->format == 1 ? $currency->sign.' ' : '').'<span id="finalPriceWithoutTax" style="font-weight: bold;"></span>'.($currency->format == 2 ? ' '.$currency->sign : '').' ('.$this->l('tax excl.').')</span>
+							'.($currency->format % 2 != 0 ? $currency->sign.' ' : '').'<span id="finalPrice" style="font-weight: bold;"></span>'.($currency->format % 2 == 0 ? ' '.$currency->sign : '').'<span'.(!Configuration::get('PS_TAX') ? ' style="display:none;"' : '').'> ('.$this->l('tax incl.').')</span>
+							<span'.(!Configuration::get('PS_TAX') ? ' style="display:none;"' : '').'> / '.($currency->format % 2 != 0 ? $currency->sign.' ' : '').'<span id="finalPriceWithoutTax" style="font-weight: bold;"></span>'.($currency->format % 2 == 0 ? ' '.$currency->sign : '').' ('.$this->l('tax excl.').')</span>
 						</td>
 					</tr>
 					<tr>
@@ -2626,7 +2640,7 @@ class AdminProducts extends AdminTab
 					<tr>
 						<td class="col-left">'.$this->l('Additional shipping cost:').'</td>
 						<td style="padding-bottom:5px;">
-							<input type="text" name="additional_shipping_cost" value="'.($this->getFieldValue($obj, 'additional_shipping_cost')).'" />'.($currency->format == 2 ? ' '.$currency->sign : '').' ('.$this->l('tax excl.').')
+							<input type="text" name="additional_shipping_cost" value="'.($this->getFieldValue($obj, 'additional_shipping_cost')).'" />'.($currency->format % 2 == 0 ? ' '.$currency->sign : '').' ('.$this->l('tax excl.').')
 							<p>'.$this->l('Carrier tax will be applied.').'</p>
 						</td>
 					</tr>
@@ -2715,7 +2729,7 @@ class AdminProducts extends AdminTab
 		{
 			echo '					<div class="lang_'.$language['id_lang'].'" style="display: '.($language['id_lang'] == $this->_defaultFormLanguage ? 'block' : 'none').'; float: left;">
 											<input size="55" type="text" id="link_rewrite_'.$language['id_lang'].'" name="link_rewrite_'.$language['id_lang'].'"
-											value="'.htmlentities($this->getFieldValue($obj, 'link_rewrite', $language['id_lang']), ENT_COMPAT, 'UTF-8').'" onkeyup="updateFriendlyURL();" onchange="updateFriendlyURL();" /><sup> *</sup>
+											value="'.htmlentities($this->getFieldValue($obj, 'link_rewrite', $language['id_lang']), ENT_COMPAT, 'UTF-8').'" onkeyup="if (isArrowKey(event)) return ;updateFriendlyURL();" onchange="updateFriendlyURL();" /><sup> *</sup>
 											<span class="hint" name="help_box">'.$this->l('Only letters and the "less" character are allowed').'<span class="hint-pointer">&nbsp;</span></span>
 										</div>';
 		}
@@ -2833,66 +2847,24 @@ class AdminProducts extends AdminTab
 					</tr>
 				</table>
 			<br />
-			</div>
-
-			<script type="text/javascript" src="'.__PS_BASE_URI__.'js/tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
-				<script type="text/javascript">
-					tinyMCE.init({
-						mode : "textareas",
-						theme : "advanced",
-						plugins : "safari,pagebreak,style,layer,table,advimage,advlink,inlinepopups,media,searchreplace,contextmenu,paste,directionality,fullscreen",
-						// Theme options
-						theme_advanced_buttons1 : "newdocument,|,bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,styleselect,formatselect,fontselect,fontsizeselect",
-						theme_advanced_buttons2 : "cut,copy,paste,pastetext,pasteword,|,search,replace,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,anchor,image,cleanup,help,code,,|,forecolor,backcolor",
-						theme_advanced_buttons3 : "tablecontrols,|,hr,removeformat,visualaid,|,sub,sup,|,charmap,media,|,ltr,rtl,|,fullscreen",
-						theme_advanced_buttons4 : "insertlayer,moveforward,movebackward,absolute,|,styleprops,|,cite,abbr,acronym,del,ins,attribs,|,pagebreak",
-						theme_advanced_toolbar_location : "top",
-						theme_advanced_toolbar_align : "left",
-						theme_advanced_statusbar_location : "bottom",
-						theme_advanced_resizing : false,
-						content_css : "'.__PS_BASE_URI__.'themes/'._THEME_NAME_.'/css/global.css",
-						document_base_url : "'.__PS_BASE_URI__.'",
-						width: "600",
-						height: "auto",
-						font_size_style_values : "8pt, 10pt, 12pt, 14pt, 18pt, 24pt, 36pt",
-						elements : "nourlconvert,ajaxfilemanager",
-						file_browser_callback : "ajaxfilemanager",
-						entity_encoding: "raw",
-						convert_urls : false,
-						language : "'.(file_exists(_PS_ROOT_DIR_.'/js/tinymce/jscripts/tiny_mce/langs/'.$iso.'.js') ? $iso : 'en').'"
-
-					});
-					function ajaxfilemanager(field_name, url, type, win) {
-						var ajaxfilemanagerurl = "'.dirname($_SERVER["PHP_SELF"]).'/ajaxfilemanager/ajaxfilemanager.php";
-						switch (type) {
-							case "image":
-								break;
-							case "media":
-								break;
-							case "flash":
-								break;
-							case "file":
-								break;
-							default:
-								return false;
-					}
-		            tinyMCE.activeEditor.windowManager.open({
-		                url: "'.dirname($_SERVER["PHP_SELF"]).'/ajaxfilemanager/ajaxfilemanager.php",
-		                width: 782,
-		                height: 440,
-		                inline : "yes",
-		                close_previous : "no"
-		            },{
-		                window : win,
-		                input : field_name
-		            });
-
-		}
-		toggleVirtualProduct(getE(\'is_virtual_good\'));
-		unitPriceWithTax(\'unit\');';
-
+			</div>';
+			// TinyMCE
+		global $cookie;
+		$iso = Language::getIsoById((int)($cookie->id_lang));
+		$isoTinyMCE = (file_exists(_PS_ROOT_DIR_.'/js/tiny_mce/langs/'.$iso.'.js') ? $iso : 'en');
+		$ad = dirname($_SERVER["PHP_SELF"]);
+		echo '
+			<script type="text/javascript">	
+			var iso = \''.$isoTinyMCE.'\' ;
+			var pathCSS = \''._THEME_CSS_DIR_.'\' ;
+			var ad = \''.$ad.'\' ;
+			</script>
+			<script type="text/javascript" src="'.__PS_BASE_URI__.'js/tiny_mce/tiny_mce.js"></script>
+			<script type="text/javascript" src="'.__PS_BASE_URI__.'js/tinymce.inc.js"></script>
+			<script type="text/javascript">
+					toggleVirtualProduct(getE(\'is_virtual_good\'));
+					unitPriceWithTax(\'unit\');';
 		$categoryBox = Tools::getValue('categoryBox', array());
-
 		echo '
 		$(function() {
 			$.ajax({
@@ -3179,7 +3151,7 @@ class AdminProducts extends AdminTab
 		  <tr><td colspan="2"><hr style="width:100%;" /></td></tr>
 		  <tr>
 			  <td style="width:150px;vertical-align:top;text-align:right;padding-right:10px;font-weight:bold;">'.$this->l('Wholesale price:').'</td>
-			  <td style="padding-bottom:5px;">'.($currency->format == 1 ? $currency->sign.' ' : '').'<input type="text" size="6"  name="attribute_wholesale_price" id="attribute_wholesale_price" value="0.00" onKeyUp="javascript:this.value = this.value.replace(/,/g, \'.\');" />'.($currency->format == 2 ? ' '.$currency->sign : '').' ('.$this->l('overrides Wholesale price on Information tab').')</td>
+			  <td style="padding-bottom:5px;">'.($currency->format % 2 != 0 ? $currency->sign.' ' : '').'<input type="text" size="6"  name="attribute_wholesale_price" id="attribute_wholesale_price" value="0.00" onKeyUp="if (isArrowKey(event)) return ;this.value = this.value.replace(/,/g, \'.\');" />'.($currency->format % 2 == 0 ? ' '.$currency->sign : '').' ('.$this->l('overrides Wholesale price on Information tab').')</td>
 		  </tr>
 		  <tr>
 			  <td style="width:150px;vertical-align:top;text-align:right;padding-right:10px;font-weight:bold;">'.$this->l('Impact on price:').'</td>
@@ -3189,9 +3161,9 @@ class AdminProducts extends AdminTab
 				  <option value="1">'.$this->l('Increase').'</option>
 				  <option value="-1">'.$this->l('Reduction').'</option>
 				</select>
-				<span id="span_impact">&nbsp;&nbsp;'.$this->l('of').'&nbsp;&nbsp;'.($currency->format == 1 ? $currency->sign.' ' : '').'
-					<input type="text" size="6" name="attribute_price" id="attribute_price" value="0.00" onKeyUp="javascript:this.value = this.value.replace(/,/g, \'.\'); calcImpactPriceTI();"/>'.($currency->format == 2 ? ' '.$currency->sign : '').' '.$this->l('(tax excl.)').'<span '.(Tax::excludeTaxeOption() ? 'style="display:none"' : '' ).'> '.$this->l('or').' '.($currency->format == 1 ? $currency->sign.' ' : '').'
-					<input type="text" size="6" name="attribute_priceTI" id="attribute_priceTI" value="0.00" onKeyUp="javascript:this.value = this.value.replace(/,/g, \'.\'); calcImpactPriceTE();"/>'.($currency->format == 2 ? ' '.$currency->sign : '').' '.$this->l('(tax incl.)').'</span> '.$this->l('final product price will be set to').' '.($currency->format == 1 ? $currency->sign.' ' : '').'<span id="attribute_new_total_price">0.00</span>'.($currency->format == 2 ? $currency->sign.' ' : '').'
+				<span id="span_impact">&nbsp;&nbsp;'.$this->l('of').'&nbsp;&nbsp;'.($currency->format % 2 != 0 ? $currency->sign.' ' : '').'
+					<input type="text" size="6" name="attribute_price" id="attribute_price" value="0.00" onKeyUp="if (isArrowKey(event)) return ;this.value = this.value.replace(/,/g, \'.\'); calcImpactPriceTI();"/>'.($currency->format % 2 == 0 ? ' '.$currency->sign : '').' '.$this->l('(tax excl.)').'<span '.(Tax::excludeTaxeOption() ? 'style="display:none"' : '' ).'> '.$this->l('or').' '.($currency->format % 2 != 0 ? $currency->sign.' ' : '').'
+					<input type="text" size="6" name="attribute_priceTI" id="attribute_priceTI" value="0.00" onKeyUp="if (isArrowKey(event)) return ;this.value = this.value.replace(/,/g, \'.\'); calcImpactPriceTE();"/>'.($currency->format % 2 == 0 ? ' '.$currency->sign : '').' '.$this->l('(tax incl.)').'</span> '.$this->l('final product price will be set to').' '.($currency->format % 2 != 0 ? $currency->sign.' ' : '').'<span id="attribute_new_total_price">0.00</span>'.($currency->format % 2 == 0 ? $currency->sign.' ' : '').'
 				</span>
 			</td>
 		  </tr>
@@ -3203,7 +3175,7 @@ class AdminProducts extends AdminTab
 			  <option value="-1">'.$this->l('Reduction').'</option>
 			  </select>
 			  <span id="span_weight_impact">&nbsp;&nbsp;'.$this->l('of').'&nbsp;&nbsp;
-				<input type="text" size="6" name="attribute_weight" id="attribute_weight" value="0.00" onKeyUp="javascript:this.value = this.value.replace(/,/g, \'.\');" /> '.Configuration::get('PS_WEIGHT_UNIT').'</span></td>
+				<input type="text" size="6" name="attribute_weight" id="attribute_weight" value="0.00" onKeyUp="if (isArrowKey(event)) return ;this.value = this.value.replace(/,/g, \'.\');" /> '.Configuration::get('PS_WEIGHT_UNIT').'</span></td>
 		  </tr>
 		  <tr id="tr_unit_impact">
 			  <td style="width:150px;vertical-align:top;text-align:right;padding-right:10px;font-weight:bold;">'.$this->l('Impact on unit price :').'</td>
@@ -3212,15 +3184,15 @@ class AdminProducts extends AdminTab
 			  <option value="1">'.$this->l('Increase').'</option>
 			  <option value="-1">'.$this->l('Reduction').'</option>
 			  </select>
-			  <span id="span_unit_impact">&nbsp;&nbsp;'.$this->l('of').'&nbsp;&nbsp;'.($currency->format == 1 ? $currency->sign.' ' : '').'
-				<input type="text" size="6" name="attribute_unity" id="attribute_unity" value="0.00" onKeyUp="javascript:this.value = this.value.replace(/,/g, \'.\');" />'.($currency->format == 2 ? ' '.$currency->sign : '').' / <span id="unity_third">'.$this->getFieldValue($obj, 'unity').'</span>
+			  <span id="span_unit_impact">&nbsp;&nbsp;'.$this->l('of').'&nbsp;&nbsp;'.($currency->format % 2 != 0 ? $currency->sign.' ' : '').'
+				<input type="text" size="6" name="attribute_unity" id="attribute_unity" value="0.00" onKeyUp="if (isArrowKey(event)) return ;this.value = this.value.replace(/,/g, \'.\');" />'.($currency->format % 2 == 0 ? ' '.$currency->sign : '').' / <span id="unity_third">'.$this->getFieldValue($obj, 'unity').'</span>
 			</span></td>
 		  </tr>';
 		if (Configuration::get('PS_USE_ECOTAX'))
 			echo'
 				  <tr>
 					  <td style="width:150px;vertical-align:top;text-align:right;padding-right:10px;font-weight:bold;">'.$this->l('Eco-tax:').'</td>
-					  <td style="padding-bottom:5px;">'.($currency->format == 1 ? $currency->sign.' ' : '').'<input type="text" size="3" name="attribute_ecotax" id="attribute_ecotax" value="0.00" onKeyUp="javascript:this.value = this.value.replace(/,/g, \'.\');" />'.($currency->format == 2 ? ' '.$currency->sign : '').' ('.$this->l('overrides Eco-tax on Information tab').')</td>
+					  <td style="padding-bottom:5px;">'.($currency->format % 2 != 0 ? $currency->sign.' ' : '').'<input type="text" size="3" name="attribute_ecotax" id="attribute_ecotax" value="0.00" onKeyUp="if (isArrowKey(event)) return ;this.value = this.value.replace(/,/g, \'.\');" />'.($currency->format % 2 == 0 ? ' '.$currency->sign : '').' ('.$this->l('overrides Eco-tax on Information tab').')</td>
 				  </tr>';
 
 		echo'
@@ -3354,7 +3326,7 @@ class AdminProducts extends AdminTab
 						echo '
 						<tr'.($irow++ % 2 ? ' class="alt_row"' : '').($product_attribute['default_on'] ? ' style="background-color:#D1EAEF"' : '').'>
 							<td>'.stripslashes($list).'</td>
-							<td class="right">'.($currency->format == 1 ? $currency->sign.' ' : '').$product_attribute['price'].($currency->format == 2 ? ' '.$currency->sign : '').'</td>
+							<td class="right">'.($currency->format % 2 != 0 ? $currency->sign.' ' : '').$product_attribute['price'].($currency->format % 2 == 0 ? ' '.$currency->sign : '').'</td>
 							<td class="right">'.$product_attribute['weight'].Configuration::get('PS_WEIGHT_UNIT').'</td>
 							<td class="right">'.$product_attribute['reference'].'</td>
 							<td class="right">'.$product_attribute['ean13'].'</td>
@@ -3508,7 +3480,7 @@ class AdminProducts extends AdminTab
 						echo '
 							<div class="lang_'.$language['id_lang'].'" style="display: '.($language['id_lang'] == $this->_defaultFormLanguage ? 'block' : 'none').'; float: left;">
 								<textarea class="custom_'.$tab_features['id_feature'].'_" name="custom_'.$tab_features['id_feature'].'_'.$language['id_lang'].'" cols="40" rows="1"
-									onkeyup="$(\'#feature_'.$tab_features['id_feature'].'_value\').val(0);" >'.htmlentities(Tools::getValue('custom_'.$tab_features['id_feature'].'_'.$language['id_lang'], FeatureValue::selectLang($tab_customs, $language['id_lang'])), ENT_COMPAT, 'UTF-8').'</textarea>
+									onkeyup="if (isArrowKey(event)) return ;$(\'#feature_'.$tab_features['id_feature'].'_value\').val(0);" >'.htmlentities(Tools::getValue('custom_'.$tab_features['id_feature'].'_'.$language['id_lang'], FeatureValue::selectLang($tab_customs, $language['id_lang'])), ENT_COMPAT, 'UTF-8').'</textarea>
 							</div>';
 					echo '
 						</td>
@@ -3584,7 +3556,7 @@ class AdminProducts extends AdminTab
 				</td>
 			</div>
 		</tr>';
-
+		// param multipleSeparator:'||' ajouté à cause de bug dans lib autocomplete
 		echo '<script type="text/javascript">
 								urlToCall = null;
 								/* function autocomplete */
@@ -3599,6 +3571,7 @@ class AdminProducts extends AdminTab
 											mustMatch:true,
 											scroll:false,
 											cacheLength:0,
+											multipleSeparator:\'||\', 
 											formatItem: function(item) {
 												return item[1]+\' - \'+item[0];
 											}

@@ -33,13 +33,13 @@
 		{$HOOK_HEADER}
 
         <script src="/cursos/themes/quali-cursos-h5/javascripts/modernizr-1.7.min.js"></script>
-        <link rel="stylesheet" href="http://meyerweb.com/eric/tools/css/reset/reset.css" type="text/css" media="screen, projection">
+        <link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/reset.css" type="text/css" media="screen, projection">
         <link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/blueprint/screen.css" type="text/css" media="screen, projection">
         <link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/blueprint/print.css" type="text/css" media="print">
         <link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/main.css" type="text/css" media="screen, projection">
         <link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/dropdown.vertical.css" type="text/css" media="screen, projection">
         <!--[if lt IE 8]><link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
-        <link href='http://fonts.googleapis.com/css?family=Arimo:regular,italic,bold,bolditalic' rel='stylesheet' type='text/css'>
+        <!--[if lt IE 9]><link rel="stylesheet" href="/cursos/themes/quali-cursos-h5/stylesheets/ie.css" type="text/css" media="screen, projection"><![endif]-->
 
 	<script type="text/javascript">
             $(document).ready(function() {
@@ -56,10 +56,10 @@
 
   <div class="container ">
     <header class="span-24">
-      <section id="logo" class="span-8">
+      <section id="logo" class="span-9">
 	    <h1>Quali Fisioterapia</h1>
 	  </section>
-	  <nav class="span-16 last">
+	  <nav class="span-15 last">
 	    <ul class="prepend-1 dropdown">
 		  <li><a href="/cursos/">Home</a></li>
 		  <li>Rio de Janeiro

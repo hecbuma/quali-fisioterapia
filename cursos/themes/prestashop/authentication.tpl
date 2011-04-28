@@ -177,6 +177,7 @@ $(function(){ldelim}
 							{/foreach}
 						</select>
 					</p>
+					{if $newsletter}
 					<p class="checkbox">
 						<input type="checkbox" name="newsletter" id="newsletter" value="1" {if isset($smarty.post.newsletter) && $smarty.post.newsletter == '1'}checked="checked"{/if}>
 						<label for="newsletter">{l s='Sign up for our newsletter'}</label>
@@ -185,6 +186,7 @@ $(function(){ldelim}
 						<input type="checkbox" name="optin" id="optin" value="1" {if isset($smarty.post.optin) && $smarty.post.optin == '1'}checked="checked"{/if}>
 						<label for="optin">{l s='Receive special offers from our partners'}</label>
 					</p>
+					{/if}
 					<h3>{l s='Delivery address'}</h3>
 					<p class="text">
 						<label for="company">{l s='Company'}</label>
@@ -316,6 +318,7 @@ $(function(){ldelim}
 				{/foreach}
 			</select>
 		</p>
+		{if $newsletter}
 		<p class="checkbox" >
 			<input type="checkbox" name="newsletter" id="newsletter" value="1" {if isset($smarty.post.newsletter) AND $smarty.post.newsletter == 1} checked="checked"{/if} />
 			<label for="newsletter">{l s='Sign up for our newsletter'}</label>
@@ -324,6 +327,7 @@ $(function(){ldelim}
 			<input type="checkbox"name="optin" id="optin" value="1" {if isset($smarty.post.optin) AND $smarty.post.optin == 1} checked="checked"{/if} />
 			<label for="optin">{l s='Receive special offers from our partners'}</label>
 		</p>
+		{/if}
 	</fieldset>
 	<fieldset class="account_creation">
 		<h3>{l s='Your address'}</h3>
@@ -397,7 +401,7 @@ $(function(){ldelim}
 			<input type="text" class="text" name="phone_mobile" id="phone_mobile" value="{if isset($smarty.post.phone_mobile)}{$smarty.post.phone_mobile}{/if}" />
 		</p>
 		<p class="required text" id="address_alias">
-			<label for="alias">{l s='Assign an address title for future reference'} !</label>
+			<label for="alias">{l s='Assign an address title for future reference'} </label>
 			<input type="text" class="text" name="alias" id="alias" value="{if isset($smarty.post.alias)}{$smarty.post.alias}{else}{l s='My address'}{/if}" />
 			<sup>*</sup>
 		</p>
