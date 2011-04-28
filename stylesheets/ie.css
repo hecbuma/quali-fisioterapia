@@ -16,14 +16,19 @@ footer {
 	height:70px;
 }
 footer section:first-child  p {
-	margin-top:-50px;
+	clear:none;
+}
+footer section p  {
+	clear:left;
 }
 footer section p  .adr {
 	color: #1d2e63;
 	text-transform:normal;
 	font-size:9px;
 }
-
+footer section ul {
+	height:20px;
+}
 
 
 section.cursos h2{
@@ -33,6 +38,7 @@ section.cursos h2{
 section.cursos-secondary h2 {
 	background-image:url('../images/h2-sec.png');
 	background-repeat: no-repeat;
+	font-size: 1.8em;
 }
 section.cursos-secondary ul.dropdown li {
 	background-color: orange;
@@ -44,6 +50,9 @@ section.cursos-secondary ul.dropdown li:hover {
 	background-position: 0 0;
 }
 
+ul.dropdown.vertical {
+	width:150px;
+}
 ul.dropdown.vertical ul {
 	background-image:url('../images/submenu-bk.png');
 	background-repeat:no-repeat;

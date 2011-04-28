@@ -47,7 +47,9 @@ background-image: -moz-linear-gradient(
 );
 
 }
-
+body.clinicas {
+	
+}
 header {
 margin-bottom:35px;
 
@@ -90,6 +92,39 @@ header nav {
     position: relative !important;
 	behavior: url(PIE.htc);
 }
+body.clinicas header nav {
+	background-image: -webkit-gradient(
+		linear,
+		right bottom,
+		left bottom,
+		color-stop(0.17, #E77817),
+		color-stop(0.47, #E7A713),
+		color-stop(0.79, #E78C16)
+	);
+	background-image: -moz-linear-gradient(
+		right center,
+		#E77817 17%,
+		#E7A713 47%,
+		#E78C16 79%
+	);
+}
+body.clinicas .container {
+	background-image: -webkit-gradient(
+	    linear,
+	    left bottom,
+	    left top,
+	    color-stop(0.03, #314170),
+	    color-stop(0.49, #5F78B8),
+	    color-stop(1, #314170)
+	);
+	background-image: -moz-linear-gradient(
+	    center bottom,
+	    #314170 3%,
+	    #5F78B8 49%,
+	    #314170 100%
+	);
+}
+
 header nav h2 {
 	text-transform: uppercase;
 	font-weight: bold;
@@ -338,7 +373,7 @@ section.cursos-secondary h2 {
     font-weight: bold;
     margin-bottom: 20px;
     padding: 10px;
-    padding-right:30px;
+    padding-right:72px;
     text-align: right;
 	color: rgba(255, 255, 255, 0.8);
 	
@@ -377,6 +412,22 @@ section.cursos-secondary ul.dropdown li {
 		#152672 0%,
 		#2F3EAD 51%,
 		#152672 95%
+	);
+}
+body.clinicas section.cursos-secondary ul.dropdown li {
+	background-image: -webkit-gradient(
+		linear,
+		right bottom,
+		left bottom,
+		color-stop(0.17, #E77817),
+		color-stop(0.47, #E7A713),
+		color-stop(0.79, #E78C16)
+	);
+	background-image: -moz-linear-gradient(
+		right center,
+		#E77817 17%,
+		#E7A713 47%,
+		#E78C16 79%
 	);
 }
 section.cursos-secondary ul.dropdown  li:hover {
