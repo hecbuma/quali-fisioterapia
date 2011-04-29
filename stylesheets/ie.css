@@ -14,7 +14,7 @@ body.clinicas header nav {
 		background: url('../images/orange-nav.png') transparent no-repeat right top;
 }
 header nav {
-	background: url('../images/nav-bk.png') transparent no-repeat right top;
+	background: url('../images/nav-bk.png') transparent no-repeat 0px 0;
 
 }
 header nav ul li:hover, header nav ul li  ul  {
