@@ -1,8 +1,17 @@
 .container {
-	background-color:orange;
+	background-image: linear-gradient(top, #E77817, #E78C16);
+	            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#E77817', EndColorStr='#E78C16');
 }
 body.blue-bkg .container {
-   background-color:#E6E6E7;
+  background-image: linear-gradient(top, #E6E6E7, #F1F1F1);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#E6E6E7', EndColorStr='#F1F1F1'); /* IE6–IE9 */
+}
+body.clinicas .container {
+	background-image: linear-gradient(top, #314170, #5F78B8);
+	            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#314170', EndColorStr='#5F78B8');
+}
+body.clinicas header nav {
+		background: url('../images/orange-nav.png') transparent no-repeat right top;
 }
 header nav {
 	background: url('../images/nav-bk.png') transparent no-repeat right top;
@@ -39,6 +48,9 @@ section.cursos-secondary h2 {
 	background-image:url('../images/h2-sec.png');
 	background-repeat: no-repeat;
 	font-size: 1.8em;
+}
+body.clinicas section.cursos-secondary ul.dropdown li {
+	background:url('../images/orange-vertical.png') transparent no-repeat right top;;
 }
 section.cursos-secondary ul.dropdown li {
 	background-color: orange;

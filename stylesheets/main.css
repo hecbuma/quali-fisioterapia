@@ -25,6 +25,8 @@ body.blue-bkg {
 		#E7A713 47%,
 		#E78C16 79%
 	);
+	background-image: linear-gradient(top, #E77817, #E78C16);
+	            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#E77817', EndColorStr='#E78C16');
     border:solid 2px white;
     margin-top: 30px;
 }
@@ -45,6 +47,8 @@ background-image: -moz-linear-gradient(
     #F1F1F1 55%,
     #E6E6E7 75%
 );
+background-image: linear-gradient(top, #E6E6E7, #F1F1F1);
+          filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#E6E6E7', EndColorStr='#F1F1F1'); /* IE6–IE9 */
 
 }
 body.clinicas {
@@ -123,6 +127,8 @@ body.clinicas .container {
 	    #5F78B8 49%,
 	    #314170 100%
 	);
+	background-image: linear-gradient(top, #314170, #5F78B8);
+	            filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#314170', EndColorStr='#5F78B8');
 }
 
 header nav h2 {
