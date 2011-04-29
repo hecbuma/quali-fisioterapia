@@ -674,3 +674,13 @@ section.cursos-secondary article.clinicas div:first-child h3 {
 section.cursos-secondary article.clinicas div.last {
 	float:right;
 }
+article.clinicas div.description {
+	height:279px;
+	overflow-y:scroll;
+}
+article.clinicas div.description h3 {
+	color:orange;
+	font-style:italic;
+	font-size:1.3em;
+	
+}
