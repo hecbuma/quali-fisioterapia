@@ -53,9 +53,8 @@ body.clinicas section.cursos-secondary ul.dropdown li {
 	background:url('../images/orange-vertical.png') transparent no-repeat right top;;
 }
 section.cursos-secondary ul.dropdown li {
-	background-color: orange;
-	background-image:url('../images/side-btn-bk.png');
-	background-position: -40px 0;
+	
+	background:url('../images/side-btn-bk.png') transparent no-repeat -40px 0;
 }
 
 section.cursos-secondary ul.dropdown li:hover {
