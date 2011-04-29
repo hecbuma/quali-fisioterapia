@@ -631,6 +631,21 @@ section.cursos-secondary article.clinicas ul {
 	font-size:.7em;
 	
 }
+section.cursos-secondary article.clinicas div ul.simple-list {
+	
+}
+section.cursos-secondary article.clinicas div ul.simple-list li {
+	font-size:1.5em;
+	 list-style: disc outside none;
+	float:none;
+}
+section.cursos-secondary article.clinicas div ul.simple-list li a{
+	text-transform:uppercase;
+	display:inline;
+}
+section.cursos-secondary article.clinicas div ul.simple-list li a:hover{
+	color:orange;
+}
 section.cursos-secondary article.clinicas ul li {
 	list-style:none;
 	float:left;
