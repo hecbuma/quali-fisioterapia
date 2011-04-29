@@ -619,6 +619,41 @@ article.curso-description  .cards {
     float:right;
 }
 
+//------------------ Some clinicas stuff --------------------
 
+section.cursos-secondary article.clinicas {
+	color:white;
+}
+section.cursos-secondary article.clinicas p{
+	color:white;
+}
+section.cursos-secondary article.clinicas ul {
+	font-size:.7em;
+	
+}
+section.cursos-secondary article.clinicas ul li {
+	list-style:none;
+	float:left;
+	color:white;
+	margin:0 0px;
+}
+section.cursos-secondary article.clinicas ul li a {
+	color:white;
+	display:block;
+	text-transform:uppercase;
+	text-decoration:none;
+	margin:0 10px;
+}
+section.cursos-secondary article.clinicas div:first-child {
+  padding-left: 108px;
+  text-align: right;
+  width: 400px;
+}
+section.cursos-secondary article.clinicas div:first-child h3 {
+	padding-right:20px;
+	font-weight: bold;
+}
 
-
+section.cursos-secondary article.clinicas div.last {
+	float:right;
+}
