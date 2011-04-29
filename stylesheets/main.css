@@ -684,3 +684,15 @@ article.clinicas div.description h3 {
 	font-size:1.3em;
 	
 }
+section.carousel {
+	height: 70px;
+   margin-bottom: 20px;
+}
+section.carousel ul.ciudades {
+	color:orange;
+	padding-right:20px;
+}
+section.carousel ul.ciudades li{
+	text-align:right;
+	font-style:italic;
+}
